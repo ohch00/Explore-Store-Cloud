@@ -1,0 +1,7 @@
+module.exports = { 
+    domain: "domain.com",
+    client_id: "client_id",
+    client_secret: "client_secret",
+    auth_secret: "auth_secret",
+    base_url: "base_url_of_website" 
+};
