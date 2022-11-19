@@ -121,7 +121,7 @@ async function get_all_stores(owner){
     const q = datastore.createQuery(STORE);
     return await datastore.runQuery(q).then( (entities) => {
         return entities[0].map(fromDatastore)
-        .filter( item => item.owner === owner )
+        .filter( item => item.owner === owner );
     });
 }
 
@@ -138,7 +138,7 @@ async function get_store(id){
 
 async function post_store(name, location, size, owner){
     var key = datastore.key(STORE);
-	const new_store = {"name": name, "location": location, "size": size, "owner": owner};
+	const new_store = {"name": name, "location": location, "size": size, "owner": owner, "stock": []};
 	return await datastore.save({"key": key, "data": new_store}).then(() => {return key});
 }
 
@@ -162,6 +162,41 @@ async function delete_store(id){
 
 
 /* ------------- Begin Product Model Functions ------------- */
+
+async function get_all_products(){
+    const q = datastore.createQuery(PRODUCT);
+    return await datastore.runQuery(q).then( (entities) => {
+        return entities[0].map(fromDatastore);
+    });
+}
+
+async function get_product(id){
+    const key = datastore.key([PRODUCT, parseInt(id,10)]);
+    const entity = await datastore.get(key);
+    if (entity[0] === undefined || entity[0] === null) {
+        return entity;
+    }
+    else {
+        return entity.map(fromDatastore);
+    }
+}
+
+async function post_product(name, type, description){
+    var key = datastore.key(PRODUCT);
+	const new_product = {"name": name, "type": type, "description": description, "stores": []};
+	return await datastore.save({"key": key, "data": new_product}).then(() => {return key});
+}
+
+async function patch_put_product(id, name, type, description){
+    const key = datastore.key([PRODUCT, parseInt(id,10)]);
+    const product = {"name": name, "type": type, "description": description};
+    return await datastore.save({"key": key, "data": product}).then(() => {return key});
+}
+
+async function delete_product(id){
+    const key = datastore.key([PRODUCT, parseInt(id,10)]);
+    return await datastore.delete(key);
+}
 
 /* ------------- End Model Functions ------------- */
 
