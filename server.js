@@ -117,6 +117,42 @@ router.get('/', function(req, res){
 
 /* ------------- Begin Store Model Functions ------------- */
 
+async function get_all_stores(owner){
+    const q = datastore.createQuery(STORE);
+    return await datastore.runQuery(q).then( (entities) => {
+        return entities[0].map(fromDatastore)
+        .filter( item => item.owner === owner )
+    });
+}
+
+async function get_store(id){
+    const key = datastore.key([STORE, parseInt(id,10)]);
+    const entity = await datastore.get(key);
+    if (entity[0] === undefined || entity[0] === null) {
+        return entity;
+    }
+    else {
+        return entity.map(fromDatastore);
+    }
+}
+
+async function post_store(name, location, size, owner){
+    var key = datastore.key(STORE);
+	const new_store = {"name": name, "location": location, "size": size, "owner": owner};
+	return await datastore.save({"key": key, "data": new_store}).then(() => {return key});
+}
+
+async function patch_put_store(id, name, location, size){
+    const key = datastore.key([STORE, parseInt(id,10)]);
+    const store = {"name": name, "location": location, "size": size};
+    return await datastore.save({"key": key, "data": store}).then(() => {return key});
+}
+
+async function delete_store(id){
+    const key = datastore.key([STORE, parseInt(id,10)]);
+    return await datastore.delete(key);
+}
+
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Store Controller Functions ------------- */
@@ -152,6 +188,14 @@ function check_header_type(req){
     } else {
         return true;
     }
+}
+
+// 403 - Forbidden; Store is not assigned to the current user
+function check_owner(store_owner, current_user){
+    if (store_owner === current_user){
+        return true;
+    }
+    return false;
 }
 
 /* ------------- End Helper Functions ------------- */
