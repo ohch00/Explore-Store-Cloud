@@ -78,12 +78,45 @@ router.get('/', function(req, res){
             if (stores.length > 0){
                 for (j=0; j < stores.length; j++) {
                     var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
-                    const store_info = { "product_id": stores[j], "self": store_self };
+                    const store_info = { "store_id": stores[j], "self": store_self };
                     products[i]["stores"][j] = store_info;
                 }
             }
             res.status(200).json(products);
             return;
+        });
+    }
+});
+
+router.get('/:id', function(req, res){
+    res.set("Content", "application/json");
+    if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else {
+        get_product(id)
+        .then( (product) => {
+            if (product[0] === undefined || product[0] === null){
+                res.status(404).json({
+                    "Error": errors['404_product']
+                });
+                return;
+            } else {
+                const self = req.protocol + "://" + req.get("host") + "/products/" + id;
+                product[0]["self"] = self;
+                const stores = product[0]["stores"]
+                if (stores.length > 0){
+                    for (j=0; j < stores.length; j++) {
+                        var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
+                        const store_info = { "store_id": stock[j], "self": store_self };
+                        stock[j] = store_info;
+                    }
+                }
+                res.status(200).json(product[0]);
+                return;
+            }
         });
     }
 });
