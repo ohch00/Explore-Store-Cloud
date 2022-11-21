@@ -159,27 +159,33 @@ router.post('/', checkJWT, function(req, res){
         !check_req_body(req.body)){
             res.status(400).json({
                 "Error": errors[400]
-            });
-    } else if (!check_unique_name(req.body.name)){
-        res.status(403).json({
-            "Error": errors['403_name']
-        });
-        return;
+            });   
     } else {
-        post_store(req.body.name, req.body.location, req.body.size, req.auth.sub)
-        .then( (key)  => {
-            const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
-            res.status(201).json({
-                "id": key.id,
-                "name": req.body.name,
-                "location": req.body.location,
-                "size": req.body.size,
-                "stock": [],
-                "owner": req.auth.sub,
-                "self": self
-            });
-            return;
+        check_unique_name(req.body.name)
+        .then( (result) => {
+            if (!result){
+                res.status(403).json({
+                    "Error": errors['403_name']
+                });
+                return;
+            } else {
+                post_store(req.body.name, req.body.location, req.body.size, req.auth.sub)
+                .then( (key)  => {
+                    const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
+                    res.status(201).json({
+                    "id": key.id,
+                    "name": req.body.name,
+                    "location": req.body.location,
+                    "size": req.body.size,
+                    "stock": [],
+                    "owner": req.auth.sub,
+                    "self": self
+                    });
+                    return;
+                });
+            }
         });
+        
     }
 });
 
