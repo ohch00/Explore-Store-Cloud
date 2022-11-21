@@ -76,17 +76,18 @@ router.get('/', checkJWT, function(req, res){
         return;
     } else {
         get_all_stores(req.auth.sub)
-        .then( (stores) => {
-            for (i=0; i< stores["stores"].length; i++){
-                const self = req.protocol + "://" + req.get("host") + "/stores/" + stores["stores"][i]["id"];
-                stores["stores"][i]["self"] = self;
+        .then( (all_stores) => {
+            const stores = all_stores["stores"];
+            for (i=0; i < stores.length; i++){
+                const self = req.protocol + "://" + req.get("host") + "/stores/" + stores[i]["id"];
+                stores[i]["self"] = self;
             }
-            const stock = stores["stores"][i]["stock"];
+            const stock = stores[i]["stock"];
             if (stock.length > 0){
                 for (j=0; j < stock.length; j++) {
                     var stock_self = req.protocol + "://" + req.get("host") + "/products/" + stock[j];
                     const stock_info = { "product_id": stock[j], "self": stock_self };
-                    stock[j] = stock_info;
+                    stores[i]["stock"][j] = stock_info;
                 }
             }
             res.status(200).json(stores);
