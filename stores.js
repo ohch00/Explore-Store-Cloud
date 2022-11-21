@@ -5,6 +5,7 @@ const ds = require('./datastore');
 const datastore = ds.datastore;
 const errors = require('./errors');
 const helper = require('./helper');
+const e = require('express');
 const router = express.Router();
 
 const STORE = "Store";
@@ -317,6 +318,11 @@ router.put('/:store_id', checkJWT, function(req, res){
             "Error": errors[406]
         });
         return
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
     } else if (!check_invalid_name_location(req.body.name) ||
     !check_invalid_name_location(req.body.location) ||
     !check_invalid_size(req.body.size) || 
@@ -324,11 +330,6 @@ router.put('/:store_id', checkJWT, function(req, res){
     !check_missing_attributes(req.body.name, req.body.location, req.body.size)){
         res.status(400).json({
             "Error": errors[400]
-        });
-        return;
-    } else if (req.auth === null || req.auth === undefined) {
-        res.status(401).json({
-            "Error": errors[401]
         });
         return;
     } else {
@@ -378,10 +379,55 @@ router.put('/', function(req, res){
     });
 });
 
+router.delete('/:store_id', function(req, res){
+    res.set("Content", "application/json");
+    if (req.params.store_id === null || req.params.store_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_store']
+        });
+        return;
+    } else if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    } else {
+        get_store(req.params.store_id)
+        .then( (store) => {
+            if (store[0] === null || store[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_store']
+                });
+                return;
+            } else if (!check_owner(store[0].owner, req.auth.sub)){
+                res.status(403).json({
+                    "Error": errors['403_owner']
+                });
+            } else {
+                delete_store(req.params.store_id)
+                .then( () => {
+                    res.status(204).end();
+                });
+            }
+        });
+    }
+});
 
-
+router.delete('/', function(req, res){
+    res.status(405).json({
+        "Error": errors['405_delete']
+    });
+});
 
 /* ------------- End Controller Functions ------------- */
+
+
+
 
 /* ------------- Begin Relationship Model Functions ------------- */
 
@@ -390,6 +436,8 @@ router.put('/', function(req, res){
 /* ------------- Begin Relationship Controller Functions ------------- */
 
 /* ------------- End Controller Functions ------------- */
+
+
 
 /* ------------- Begin Helper Functions ------------- */
 
