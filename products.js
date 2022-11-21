@@ -175,6 +175,113 @@ router.post('/', function(req, res){
     }
 });
 
+router.patch('/:product_id', function(req, res){
+    res.set("Content", "application/json");
+    has_name = false;
+    has_type = false;
+    if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (req.params.product_id === null || req.params.product_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_product']
+        });
+        return;
+    } else if ((req.body.name === null || req.body.name === undefined) && 
+        (req.body.type === null || req.body.type === undefined) &&
+        (req.body.description === null || req.body.description === undefined)){
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+    } else if (!check_req_body(req.body)){
+        res.status(400).json({
+            "Error": errors['400_patch']
+        });
+        return;
+    }
+    if (req.body.type !== null && req.body.type !== undefined){
+        if (!check_invalid_string(req.body.type)) {
+            res.status(400).json({
+                "Error": errors['400_patch']});
+            return;
+        } else {
+            has_type = true;            
+        }
+    }
+    if (req.body.name !== null || req.body.name === undefined){
+        if (!check_invalid_string(req.body.name)) {
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+        } else {
+            check_unique_name(req.body.name)
+            .then( (result) => {
+                if (!result){
+                    res.status(403).json({
+                        "Error": errors['403_name']
+                    });
+                    return;
+                } else {
+                    has_name = true;
+                }
+            });
+        }
+    }
+    if (has_name === true && has_type === true) {
+        res.status(400).json({
+            "Error": errors['400_patch']
+        });
+        return;
+    } else {
+        get_product(req.params.product_id)
+        .then( (product) => {
+            if (product[0] === null || product[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_product']
+                });
+                return;
+            } else {
+                var update_name = product[0].name;
+                var update_type = product[0].type;
+                var update_description = product[0].description;
+
+                if (has_name){
+                    update_name = req.body.name;
+                }
+                if (has_type){
+                    update_type = req.body.type;
+                }
+                if (req.body.description !== null && req.body.description !== undefined){
+                    if (!check_invalid_string(req.body.description)){
+                        res.status(400).json({
+                            "Error": errors['400_patch']
+                        });
+                        return;
+                    } else {
+                        update_description = req.body.description;
+                    }
+                }
+                patch_put_store(req.params.product_id, update_name, update_type, update_description)
+                .then( (key) => {
+                    const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
+                    res.status(200).json({
+                        "id": key.id,
+                        "name": update_name,
+                        "type": update_type,
+                        "description": update_description,
+                        "stores": product[0].stores,
+                        "self": self
+                    });
+                });
+            }
+        })
+    }
+});
+
 router.put('/:product_id', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
@@ -230,7 +337,7 @@ router.put('/:product_id', function(req, res){
                                 "name": req.body.name,
                                 "type": req.body.type,
                                 "description": new_description,
-                                "stores": [],
+                                "stores": product[0].stores,
                                 "self": self
                             });
                             return;
