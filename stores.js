@@ -4,8 +4,6 @@ const checkJWT = require('./auth').checkJwt;
 const ds = require('./datastore');
 const datastore = ds.datastore;
 const errors = require('./errors');
-const helper = require('./helper');
-const e = require('express');
 const router = express.Router();
 
 const STORE = "Store";
@@ -66,7 +64,7 @@ async function delete_store(id){
 
 router.get('/', checkJWT, function(req, res){
     res.set("Content", "application/json");
-    if (!helper.check_header_type(req)){
+    if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
         });
@@ -99,7 +97,7 @@ router.get('/', checkJWT, function(req, res){
 
 router.get('/:id', checkJWT, function(req, res){
     res.set("Content", "application/json");
-    if (!helper.check_header_type(req)){
+    if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
         });
@@ -142,7 +140,7 @@ router.get('/:id', checkJWT, function(req, res){
 
 router.post('/', checkJWT, function(req, res){
     res.set("Content", "application/json");
-    if (!helper.check_header_type(req)){
+    if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
         });
@@ -190,7 +188,7 @@ router.patch('/:store_id', checkJWT, function(req, res){
     var has_location = false;
     var has_size = false;
 
-    if (!helper.check_header_type(req)){
+    if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
         });
