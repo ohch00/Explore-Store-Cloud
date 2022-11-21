@@ -120,10 +120,10 @@ router.get('/:id', checkJWT, function(req, res){
                 res.status(403).json({
                     "Error": errors['403_owner']
                 });
+                return;
             } else {
                 const self = req.protocol + "://" + req.get("host") + "/stores/" + id;
                 store[0]["self"] = self;
-
                 const stock = store[0]["stock"]
                 if (stock.length > 0){
                     for (j=0; j < stock.length; j++) {
@@ -164,10 +164,11 @@ router.post('/', checkJWT, function(req, res){
         res.status(403).json({
             "Error": errors['403_name']
         });
+        return;
     } else {
         post_store(req.body.name, req.body.location, req.body.size, req.auth.sub)
         .then( (key)  => {
-            const self = req.protocol + "://" + req.get("host") + "/stores/" + key;
+            const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
             res.status(201).json({
                 "id": key,
                 "name": req.body.name,
@@ -177,16 +178,17 @@ router.post('/', checkJWT, function(req, res){
                 "owner": req.auth.sub,
                 "self": self
             });
+            return;
         });
     }
 });
 
-router.patch('/', checkJWT, function(req, res){
+router.patch('/:store_id', checkJWT, function(req, res){
     res.set("Content", "application/json");
     var has_name = false;
     var has_location = false;
     var has_size = false;
-    
+
     if (!helper.check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
@@ -197,6 +199,109 @@ router.patch('/', checkJWT, function(req, res){
             "Error": errors[401]
         });
         return;
+    } else if (req.params.store_id === null || req.params.store_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_store']
+        });
+        return;
+    } else if ((req.body.name === null || req.body.name === undefined) && 
+    (req.body.location === null || req.body.location === undefined) &&
+    (req.body.size === null || req.body.size === undefined)) {
+        res.status(400).json({
+            "Error": errors['400_patch']
+        });
+        return;
+    } else if (!check_req_body(req.body)){
+        res.status(400).json({
+            "Error": errors['400_patch']
+        });
+        return;
+    } 
+    if (req.body.location !== undefined && req.body.location !== null) {
+        if (!check_invalid_name_location(req.body.location)) {
+            res.status(400).json({
+                "Error": errors['400_patch']});
+            return;
+        } else {
+            has_location = true;            
+        }
+    } 
+    if (req.body.size !== undefined && req.body.size !== null) {
+        if (!check_invalid_size(req.body.size)) {
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+        } else {
+            has_size = true;
+        }
+    }
+    if (req.body.name !== null || req.body.name === undefined){
+        if (!check_invalid_name_location(req.body.name)) {
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+        } else {
+            check_unique_name(req.body.name)
+            .then( (result) => {
+                if (!result){
+                    res.status(403).json({
+                        "Error": errors['403_owner_and_name']
+                    });
+                    return;
+                } else {
+                    has_name = true;
+                }
+            });
+        }
+    }
+    if (has_name === true && has_location === true && has_size === true) {
+        res.status(400).json({
+            "Error": errors['400_patch']
+        });
+        return;
+    } else {
+        get_store(req.params.store_id)
+        .then( (store) => {
+            if (store[0] === null || store[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_store']
+                });
+                return;
+            } else if (!check_owner(store[0].owner, req.auth.sub)){
+                res.status(403).json({
+                    "Error": errors['403_owner_and_name']
+                });
+            } else {
+                var update_name = store[0].name;
+                var update_location = store[0].location;
+                var update_size = store[0].size;
+
+                if (has_name){
+                    update_name = req.body.name;
+                }
+                if (has_location){
+                    update_location = req.body.location;
+                }
+                if (has_size){
+                    update_size = req.body.size;
+                }
+                patch_put_store(req.params.store_id, req.body.name, req.body.location, req.body.size)
+                .then( (key) => {
+                    const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
+                    res.status(200).json({
+                        "id": key.id,
+                        "name": update_name,
+                        "location": update_location,
+                        "size": update_size,
+                        "stock": store[0].stock,
+                        "owner": store[0].owner,
+                        "self": self
+                    });
+                });
+            }
+        });
     }
 });
 
