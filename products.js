@@ -1,9 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const router = express.Router();
 const ds = require('./datastore');
 const datastore = ds.datastore;
-const helper = require('./helper');
+const errors = require('./errors');
+const router = express.Router();
 
 const PRODUCT = "Product";
 
@@ -35,7 +35,7 @@ async function get_product(id){
         return entity;
     }
     else {
-        return entity.map(fromDatastore);
+        return entity.map(ds.fromDatastore);
     }
 }
 
@@ -60,7 +60,12 @@ async function delete_product(id){
 
 /* ------------- Begin Product Controller Functions ------------- */
 
+
+
 /* ------------- End Controller Functions ------------- */
+
+
+
 
 /* ------------- Begin Relationship Model Functions ------------- */
 
@@ -69,5 +74,63 @@ async function delete_product(id){
 /* ------------- Begin Relationship Controller Functions ------------- */
 
 /* ------------- End Controller Functions ------------- */
+
+
+
+/* ------------- Begin Helper Functions ------------- */
+
+// 400 - missing attributes
+function check_missing_attributes(name, type, description) {
+    if (name === null || name === undefined ||
+        type === null || type === undefined ||
+        description === null || description === undefined) {
+            return false;
+        } else {
+            return true;
+        }
+}
+
+// 400 - invalid inputs
+function check_invalid_string(str) {
+    if (typeof str !== 'string') {
+        return false;
+    }
+    if (str.length < 1 || str.length > 255) {
+        return false;
+    }
+    return true;
+}
+function check_req_body(req_body) {
+    for (var i in req_body){
+        if (i !== 'name' && i !== 'type' && i !== 'description') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 403 - Forbidden; Name already exists in Datastore
+async function check_unique_name(name){
+    const q = datastore.createQuery(PRODUCT);
+    const entities = await datastore.runQuery(q);
+    const products = entities[0];
+
+    for (i=0; i < products.length; i++) {
+        if (name === products[i].name) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 406 - Accept Header is not JSON
+function check_header_type(req){
+    if(req.get('accept') !== 'application/json'){
+        return false;
+    } else {
+        return true;
+    }
+}
+/* ------------- End Helper Functions ------------- */
 
 module.exports = router;
