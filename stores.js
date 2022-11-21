@@ -14,10 +14,19 @@ router.use(bodyParser.json());
 /* ------------- Begin Store Model Functions ------------- */
 
 async function get_all_stores(owner){
-    const q = datastore.createQuery(STORE);
+    const q = datastore.createQuery(STORE).limit(5);
+    var results = {};
+    if (Object.keys(req.query).includes("cursor")){
+        q = q.start(req.query.cursor);
+    }
     return await datastore.runQuery(q).then( (entities) => {
-        return entities[0].map(ds.fromDatastore)
-        .filter( item => item.owner === owner );
+        results.stores = entities[0].map(ds.fromDatastore)
+        .filter( item => item.owner === owner);
+
+        if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
+            results.next = req.protocol + "://" + req.get("host") + "/stores?cursor=" + entities[1].endCursor;
+        }
+        return results;
     });
 }
 
@@ -62,6 +71,7 @@ router.get('/', checkJWT, function(req, res){
     } else {
         get_all_stores(req.auth.sub)
         .then( (stores) => {
+
             res.status(200).json(stores);
             return;
         });
@@ -86,10 +96,16 @@ router.get('/:id', checkJWT, function(req, res){
                 res.status(403).json({
                     "Error": "this store is owned by another user"
                 });
+            } else {
+                const self = 
+                res.status(200).json(store[0]);
+                return;
             }
         });
     }
-})
+});
+
+router
 
 
 /* ------------- End Controller Functions ------------- */

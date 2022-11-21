@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const router = express.Router();
-const checkJWT = require('./auth').checkJWT;
 const ds = require('./datastore');
 const datastore = ds.datastore;
 const helper = require('./helper');
@@ -15,9 +14,17 @@ router.use(bodyParser.json());
 /* ------------- Begin Product Model Functions ------------- */
 
 async function get_all_products(){
-    const q = datastore.createQuery(PRODUCT);
+    const q = datastore.createQuery(PRODUCT).limit(5);
+    var results = {};
+    if (Object.keys(req.query).includes("cursor")){
+        q = q.start(req.query.cursor);
+    }
     return await datastore.runQuery(q).then( (entities) => {
-        return entities[0].map(fromDatastore);
+        results.stores = entities[0].map(ds.fromDatastore);
+        if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
+            results.next = req.protocol + "://" + req.get("host") + "/products?cursor=" + entities[1].endCursor;
+        }
+        return results;
     });
 }
 
