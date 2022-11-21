@@ -477,7 +477,7 @@ router.patch('/:store_id/products/:product_id', function(req, res){
         res.status(406).json({
             "Error": errors[406]
         });
-        return
+        return;
     } else if (req.auth === null || req.auth === undefined) {
         res.status(401).json({
             "Error": errors[401]
@@ -536,6 +536,91 @@ router.patch('/:store_id/products/:product_id', function(req, res){
 
 router.delete('/:store_id/products/:product_id', function(req, res){
     res.set("Content", "application/json");
+    if (req.params.store_id === null || req.params.store_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_store']
+        });
+        return;
+    } else if (req.params.product_id === null || req.params.product_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_product']
+        });
+        return;
+    } else if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    } else {
+        get_store(req.params.store_id)
+        .then( (store) => {
+            if (store[0] === null || store[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_store']
+                });
+                return;
+            } else if (!check_owner(store[0].owner, req.auth.sub)){
+                res.status(403).json({
+                    "Error": errors['403_no_stock']
+                });
+                return;
+            } else {
+                var has_product = false;
+                var store_stock = store[0].stock;
+                for (i=0; i < store_stock.length; i++){
+                    if (store_stock[i] === req.params.product_id){
+                        store_stock.splice(i, 1);
+                        has_product = true;
+                        break;
+                    }
+                }
+                if (!has_product){
+                    res.status(403).json({
+                        "Error": errors['403_no_stock']
+                    });
+                    return;
+                } else {
+                    product_imports.get_product(req.params.product_id)
+                    .then( (product) => {
+                        if (product[0] === null || product[0] === undefined){
+                            res.status(404).json({
+                                "Error": errors['404_product']
+                            });
+                            return;
+                        }
+                        var has_store = false;
+                        var product_stores = product[0].stores;
+                        for (i=0; i < product_stores.length; i++){
+                            if (product_stores[i] === req.params.store_id){
+                                product_stores.splice(i, 1);
+                                has_store = true;
+                                break;
+                            }
+                        }
+                        if (!has_store){
+                            res.status(403).json({
+                                "Error": errors['403_no_stock']
+                            });
+                            return;
+                        } else {
+                            remove_product_from_store(req.params.store_id, store_stock)
+                            .then( () => {
+                                product_imports.remove_store_from_product(req.params.product_id, product_stores)
+                                .then( () => {
+                                    res.status(204).end();
+                                });
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    }
 });
 
 /* ------------- End Controller Functions ------------- */
