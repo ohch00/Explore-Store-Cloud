@@ -305,6 +305,81 @@ router.patch('/:store_id', checkJWT, function(req, res){
     }
 });
 
+router.put('/:store_id', checkJWT, function(req, res){
+    res.set("Content", "application/json");
+    if (req.params.store_id === null || req.params.store_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_store']
+        });
+        return;
+    } else if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return
+    } else if (!check_invalid_name_location(req.body.name) ||
+    !check_invalid_name_location(req.body.location) ||
+    !check_invalid_size(req.body.size) || 
+    !check_req_body(req.body) ||
+    !check_missing_attributes(req.body.name, req.body.location, req.body.size)){
+        res.status(400).json({
+            "Error": errors[400]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    } else {
+        check_unique_name(req.params.name)
+        .then( (result) => {
+            if (!result){
+                res.status(403).json({
+                    "Error": errors['403_owner_and_name']
+                });
+                return;
+            } else {
+                get_store(req.params.store_id)
+                .then( (store) => {
+                    if (store[0] === null || store[0] === undefined){
+                        res.status(404).json({
+                            "Error": errors['404_store']
+                        });
+                        return;
+                    } else if (!check_owner(store[0].owner, req.auth.sub)){
+                        res.status(403).json({
+                            "Error": errors['403_owner_and_name']
+                        });
+                    } else {
+                        patch_put_store(req.params.store_id, req.body.name, req.body.location, req.body.size)
+                        .then( (key) => {
+                            const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
+                            res.status(200).json({
+                                "id": key.id,
+                                "name": req.body.name,
+                                "location": req.body.location,
+                                "size": req.body.size,
+                                "stock": store[0].stock,
+                                "owner": store[0].owner,
+                                "self": self
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    }
+});
+
+router.put('/', function(req, res){
+    res.status(405).json({
+        "Error": errors['405_edit']
+    });
+});
+
+
+
 
 /* ------------- End Controller Functions ------------- */
 
