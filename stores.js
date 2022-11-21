@@ -170,7 +170,7 @@ router.post('/', checkJWT, function(req, res){
         .then( (key)  => {
             const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
             res.status(201).json({
-                "id": key,
+                "id": key.id,
                 "name": req.body.name,
                 "location": req.body.location,
                 "size": req.body.size,
@@ -378,7 +378,7 @@ router.put('/', function(req, res){
     });
 });
 
-router.delete('/:store_id', function(req, res){
+router.delete('/:store_id', checkJWT, function(req, res){
     res.set("Content", "application/json");
     if (req.params.store_id === null || req.params.store_id === undefined){
         res.status(404).json({
