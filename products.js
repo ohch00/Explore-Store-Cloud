@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const ds = require('./datastore');
 const datastore = ds.datastore;
 const errors = require('./errors');
+const e = require('express');
 const router = express.Router();
 
 const PRODUCT = "Product";
@@ -136,35 +137,107 @@ router.post('/', function(req, res){
                 "Error": errors[400]
             });
             return;
-    } else if (!check_unique_name(req.body.name)){
-        res.status(403).json({
-            "Error": errors['403_name']
-        });
-        return;
     } else {
-        var new_description = req.body.description;
-        if (new_description !== null && new_description !== undefined){
-            if(!check_invalid_string(new_description)){
-                res.status(400).json({
-                    "Error": errors[400]
+        check_unique_name(req.body.name)
+        .then( (result) => {
+            if (!result){
+                res.status(403).json({
+                    "Error": errors['403_name']
                 });
                 return;
+            } else {
+                var new_description = req.body.description;
+                if (new_description !== null && new_description !== undefined){
+                    if(!check_invalid_string(new_description)){
+                        res.status(400).json({
+                            "Error": errors[400]
+                        });
+                        return;
+                    }
+                } else {
+                    new_description = "";
+                }
+                post_product(req.body.name, req.body.type, new_description)
+                .then( (key)  => {
+                    const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
+                    res.status(201).json({
+                        "id": key.id,
+                        "name": req.body.name,
+                        "type": req.body.type,
+                        "description": new_description,
+                        "stores": [],
+                        "self": self
+                    });
+                    return;
+                });
             }
-        } else {
-            new_description = "";
-        }
-        post_product(req.body.name, req.body.type, new_description)
-        .then( (key)  => {
-            const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
-            res.status(201).json({
-                "id": key.id,
-                "name": req.body.name,
-                "type": req.body.type,
-                "description": new_description,
-                "stores": [],
-                "self": self
+        });
+    }
+});
+
+router.put('/:product_id', function(req, res){
+    res.set("Content", "application/json");
+    if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (req.params.product_id === null || req.params.product_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_product']
+        });
+        return;
+    } else if (!check_missing_attributes(req.body.name, req.body.type) || 
+        !check_invalid_string(req.body.name) || 
+        !check_invalid_string(req.body.type) ||
+        !check_req_body(req.body)){
+            res.status(400).json({
+                "Error": errors[400]
             });
-            return;
+            return;        
+    } else {
+        check_unique_name(req.body.name)
+        .then( (result) => {
+            if (!result){
+                res.status(403).json({
+                    "Error": errors['403_name']
+                });
+                return;
+            } else {
+                var new_description = req.body.description;
+                if (new_description !== null && new_description !== undefined){
+                    if (!check_invalid_string(new_description)){
+                        res.status(400).json({
+                            "Error": errors[400]
+                        });
+                        return;
+                    }
+                } else {
+                    new_description = "";
+                }
+                get_product(req.params.product_id)
+                .then( (product) => {
+                    if (product[0] === null || product[0] === undefined){
+                        res.status(404).json({
+                            "Error": errors['404_product']
+                        });
+                    } else {
+                        patch_put_product(req.body.name, req.body.type, new_description)
+                        .then( (key)  => {
+                            const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
+                            res.status(200).json({
+                                "id": key.id,
+                                "name": req.body.name,
+                                "type": req.body.type,
+                                "description": new_description,
+                                "stores": [],
+                                "self": self
+                            });
+                            return;
+                        });
+                    }
+                });
+            }
         });
     }
 });
