@@ -59,7 +59,34 @@ async function delete_product(id){
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Product Controller Functions ------------- */
-
+router.get('/', function(req, res){
+    res.set("Content", "application/json");
+    if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else {
+        get_all_products()
+        .then( (all_products) => {
+            const products = all_products["products"];
+            for (i=0; i< products.length; i++){
+                const self = req.protocol + "://" + req.get("host") + "/products/" + products[i]["id"];
+                products[i]["self"] = self;
+            }
+            const stores = products[i]["stores"];
+            if (stores.length > 0){
+                for (j=0; j < stores.length; j++) {
+                    var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
+                    const store_info = { "product_id": stores[j], "self": store_self };
+                    products[i]["stores"][j] = store_info;
+                }
+            }
+            res.status(200).json(products);
+            return;
+        });
+    }
+});
 
 
 /* ------------- End Controller Functions ------------- */
