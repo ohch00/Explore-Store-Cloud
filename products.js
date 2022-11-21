@@ -461,3 +461,4 @@ function check_header_type(req){
 /* ------------- End Helper Functions ------------- */
 
 module.exports = router;
+module.exports = get_product();
