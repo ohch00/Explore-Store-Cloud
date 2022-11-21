@@ -293,7 +293,7 @@ router.patch('/:store_id', checkJWT, function(req, res){
                 if (has_size){
                     update_size = req.body.size;
                 }
-                patch_put_store(req.params.store_id, req.body.name, req.body.location, req.body.size)
+                patch_put_store(req.params.store_id, update_name, update_location, update_size)
                 .then( (key) => {
                     const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
                     res.status(200).json({
