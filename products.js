@@ -168,6 +168,48 @@ router.post('/', function(req, res){
         });
     }
 });
+
+router.put('/', function(req, res){
+    res.status(405).json({
+        "Error": errors['405_edit']
+    });
+});
+
+router.delete('/:product_id', function(req, res){
+    res.set("Content", "application/json");
+    if (req.params.product_id === null || req.params.product_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_product']
+        });
+        return;
+    } else if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return
+    } else {
+        get_product(req.params.product_id)
+        .then( (product) => {
+            if (product[0] === null || product[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_product']
+                });
+                return;
+            } else {
+                delete_product(req.params.product_id)
+                .then( () => {
+                    res.status(204).end();
+                });
+            }
+        });
+    }
+});
+
+router.delete('/', function(req, res){
+    res.status(405).json({
+        "Error": errors['405_delete']
+    });
+});
 /* ------------- End Controller Functions ------------- */
 
 
