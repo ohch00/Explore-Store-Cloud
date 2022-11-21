@@ -64,9 +64,15 @@ async function delete_store(id){
 /* ------------- Begin Store Controller Functions ------------- */
 
 router.get('/', checkJWT, function(req, res){
+    res.set("Content", "application/json");
     if (!helper.check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
         });
         return;
     } else {
@@ -91,9 +97,15 @@ router.get('/', checkJWT, function(req, res){
 });
 
 router.get('/:id', checkJWT, function(req, res){
+    res.set("Content", "application/json");
     if (!helper.check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
         });
         return;
     } else {
@@ -127,7 +139,66 @@ router.get('/:id', checkJWT, function(req, res){
     }
 });
 
-router
+router.post('/', checkJWT, function(req, res){
+    res.set("Content", "application/json");
+    if (!helper.check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    } else if (
+        !check_missing_attributes(req.body.name, req.body.location, req.body.size) || 
+        !check_invalid_name_location(req.body.name) || 
+        !check_invalid_name_location(req.body.location) ||
+        !check_invalid_size(req.body.size) ||
+        !check_req_body(req.body)){
+            res.status(400).json({
+                "Error": errors[400]
+            });
+    } else if (!check_unique_name(req.body.name)){
+        res.status(403).json({
+            "Error": errors['403_name']
+        });
+    } else {
+        post_store(req.body.name, req.body.location, req.body.size, req.auth.sub)
+        .then( (key)  => {
+            const self = req.protocol + "://" + req.get("host") + "/stores/" + key;
+            res.status(201).json({
+                "id": key,
+                "name": req.body.name,
+                "location": req.body.location,
+                "size": req.body.size,
+                "stock": [],
+                "owner": req.auth.sub,
+                "self": self
+            });
+        });
+    }
+});
+
+router.patch('/', checkJWT, function(req, res){
+    res.set("Content", "application/json");
+    var has_name = false;
+    var has_location = false;
+    var has_size = false;
+    
+    if (!helper.check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    }
+});
 
 
 /* ------------- End Controller Functions ------------- */
@@ -139,5 +210,78 @@ router
 /* ------------- Begin Relationship Controller Functions ------------- */
 
 /* ------------- End Controller Functions ------------- */
+
+/* ------------- Begin Helper Functions ------------- */
+
+// 400 - missing attributes
+function check_missing_attributes(name, location, size) {
+    if (name === null || name === undefined ||
+        location === null || location === undefined ||
+        size === null || size === undefined) {
+            return false;
+        } else {
+            return true;
+        }
+}
+
+// 400 - invalid inputs
+function check_invalid_name_location(str) {
+    if (typeof str !== 'string') {
+        return false;
+    }
+    if (str.length < 1 || str.length > 255) {
+        return false;
+    }
+    return true;
+}
+function check_invalid_size(size) {
+    if (typeof size !== 'number') {
+        return false;
+    }
+    if (size < 1 || size > 2147483647) {
+        return false;
+    }
+    return true;
+}
+function check_req_body(req_body) {
+    for (var i in req_body){
+        if (i !== 'name' && i !== 'location' && i !== 'size') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 403 - Forbidden; Store is not assigned to the current user
+async function check_owner(store_owner, current_user){
+    if (store_owner === current_user){
+        return true;
+    }
+    return false;
+}
+
+// 403 - Forbidden; Name already exists in Datastore
+async function check_unique_name(name){
+    const q = datastore.createQuery(STORE);
+    const entities = await datastore.runQuery(q);
+    const stores = entities[0];
+
+    for (i=0; i < stores.length; i++) {
+        if (name === stores[i].name) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 406 - Accept Header is not JSON
+function check_header_type(req){
+    if(req.get('accept') !== 'application/json'){
+        return false;
+    } else {
+        return true;
+    }
+}
+/* ------------- End Helper Functions ------------- */
 
 module.exports = router;
