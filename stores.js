@@ -4,6 +4,7 @@ const checkJWT = require('./auth').checkJwt;
 const ds = require('./datastore');
 const datastore = ds.datastore;
 const errors = require('./errors');
+const product_imports = require('./products');
 const router = express.Router();
 
 const STORE = "Store";
@@ -49,7 +50,8 @@ async function post_store(name, location, size, owner){
 
 async function patch_put_store(id, name, location, size){
     const key = datastore.key([STORE, parseInt(id,10)]);
-    const store = {"name": name, "location": location, "size": size};
+    const entity = await datastore.get(key)[0];
+    const store = {"name": name, "location": location, "size": size, "owner": entity.owner, "stock": entity.stock};
     return await datastore.save({"key": key, "data": store}).then(() => {return key});
 }
 
@@ -436,9 +438,105 @@ router.delete('/', function(req, res){
 
 /* ------------- Begin Relationship Model Functions ------------- */
 
+async function add_product_to_store(store_id, product_id){
+    const key = datastore.key([STORE, parseInt(store_id,10)]);
+    const entity = await datastore.get(key);
+    var store = entity[0];
+    store.stock.push(product_id);
+    const update_store = {"name": store.name, "location": store.location, "size": store.size, "owner": store.owner, "stock": store.stock};
+    await datastore.save({ "key": key, "data": update_store });
+    return key;
+}
+
+async function remove_product_from_store(store_id, stock){
+    const key = datastore.key([STORE, parseInt(store_id,10)]);
+    const entity = await datastore.get(key);
+    var store = entity[0];
+    const update_store = {"name": store.name, "location": store.location, "size": store.size, "owner": store.owner, "stock": stock};
+    await datastore.save({ "key": key, "data": update_store });
+    return key;
+}
+
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Relationship Controller Functions ------------- */
+
+router.patch('/:store_id/products/:product_id', function(req, res){
+    res.set("Content", "application/json");
+    if (req.params.store_id === null || req.params.store_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_store']
+        });
+        return;
+    } else if (req.params.product_id === null || req.params.product_id === undefined){
+        res.status(404).json({
+            "Error": errors['404_product']
+        });
+        return;
+    } else if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return
+    } else if (req.auth === null || req.auth === undefined) {
+        res.status(401).json({
+            "Error": errors[401]
+        });
+        return;
+    } else {
+        get_store(req.params.store_id)
+        .then( (store) => {
+            if (store[0] === null || store[0] === undefined){
+                res.status(404).json({
+                    "Error": errors['404_store']
+                });
+                return;
+            } else if (!check_owner(store[0].owner, req.auth.sub)){
+                res.status(403).json({
+                    "Error": errors['403_already_stocked']
+                });
+                return;
+            } else {
+                for (i=0; i < store[0].stock.length; i++){
+                    if (store[0].stock[i] === req.params.product_id){
+                        res.status(403).json({
+                            "Error": errors['403_already_stocked']
+                        });
+                        return;
+                    }
+                }
+                product_imports.get_product(req.params.product_id)
+                .then( (product) => {
+                    if (product[0] === null || product[0] === undefined){
+                        res.status(404).json({
+                            "Error": errors['404_product']
+                        });
+                        return;
+                    }
+                    for (j=0; j < product[0].stores.length; j++){
+                        if (product[0].stores[i] === req.params.store_id){
+                            res.status(403).json({
+                                "Error": errors['403_already_stocked']
+                            });
+                            return;
+                        }
+                    }
+                    add_product_to_store(req.params.store_id, req.params.product_id)
+                    .then( () => {
+                        product_imports.add_store_to_product(req.params.product_id, req.params.store_id)
+                        .then( () => {
+                            res.status(204).end();
+                        });
+                    });
+                });
+            }
+        });
+    }
+});
+
+router.delete('/:store_id/products/:product_id', function(req, res){
+    res.set("Content", "application/json");
+});
 
 /* ------------- End Controller Functions ------------- */
 

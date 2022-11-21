@@ -60,6 +60,7 @@ async function delete_product(id){
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Product Controller Functions ------------- */
+
 router.get('/', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
@@ -390,18 +391,33 @@ router.delete('/', function(req, res){
         "Error": errors['405_delete']
     });
 });
-/* ------------- End Controller Functions ------------- */
 
+/* ------------- End Controller Functions ------------- */
 
 
 
 /* ------------- Begin Relationship Model Functions ------------- */
 
+async function add_store_to_product(product_id, store_id){
+    const key = datastore.key([PRODUCT, parseInt(product_id, 10)]);
+    const entity = await datastore.get(key);
+    var product = entity[0];
+    product.stores.push(store_id);
+    update_product = { "name": product.name, "type": product.type, "description": product.description, "stores": product.stores }
+    await datastore.save({ "key": key, "data": update_product });
+    return key;
+}
+
+async function remove_store_from_product(product_id, stores){
+    const key = datastore.key([PRODUCT, parseInt(product_id, 10)]);
+    const entity = await datastore.get(key);
+    var product = entity[0];
+    update_product = { "name": product.name, "type": product.type, "description": product.description, "stores": stores }
+    await datastore.save({ "key": key, "data": update_loads });
+    return key;
+}
+
 /* ------------- End Model Functions ------------- */
-
-/* ------------- Begin Relationship Controller Functions ------------- */
-
-/* ------------- End Controller Functions ------------- */
 
 
 
@@ -458,7 +474,10 @@ function check_header_type(req){
         return true;
     }
 }
+
 /* ------------- End Helper Functions ------------- */
 
 module.exports = router;
 module.exports = get_product();
+module.exports = add_store_to_product();
+module.exports = remove_store_from_product();
