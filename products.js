@@ -121,7 +121,53 @@ router.get('/:id', function(req, res){
     }
 });
 
-
+router.post('/', function(req, res){
+    res.set("Content", "application/json");
+    if (!check_header_type(req)){
+        res.status(406).json({
+            "Error": errors[406]
+        });
+        return;
+    } else if (!check_missing_attributes(req.body.name, req.body.type) || 
+        !check_invalid_string(req.body.name) || 
+        !check_invalid_string(req.body.type) ||
+        !check_req_body(req.body)){
+            res.status(400).json({
+                "Error": errors[400]
+            });
+            return;
+    } else if (!check_unique_name(req.body.name)){
+        res.status(403).json({
+            "Error": errors['403_name']
+        });
+        return;
+    } else {
+        var new_description = req.body.description;
+        if (new_description !== null && new_description !== undefined){
+            if(!check_invalid_string(new_description)){
+                res.status(400).json({
+                    "Error": errors[400]
+                });
+                return;
+            }
+        } else {
+            new_description = "";
+        }
+        post_product(req.body.name, req.body.type, new_description)
+        .then( (key)  => {
+            const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
+            res.status(201).json({
+                "id": key.id,
+                "name": req.body.name,
+                "type": req.body.type,
+                "description": new_description,
+                "stores": [],
+                "self": self
+            });
+            return;
+        });
+    }
+});
 /* ------------- End Controller Functions ------------- */
 
 
@@ -140,10 +186,9 @@ router.get('/:id', function(req, res){
 /* ------------- Begin Helper Functions ------------- */
 
 // 400 - missing attributes
-function check_missing_attributes(name, type, description) {
+function check_missing_attributes(name, type) {
     if (name === null || name === undefined ||
-        type === null || type === undefined ||
-        description === null || description === undefined) {
+        type === null || type === undefined) {
             return false;
         } else {
             return true;
