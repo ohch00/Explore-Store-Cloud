@@ -1,10 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const router = express.Router();
-const checkJWT = require('./auth').checkJWT;
+const checkJWT = require('./auth').checkJwt;
 const ds = require('./datastore');
 const datastore = ds.datastore;
+const errors = require('./errors');
 const helper = require('./helper');
+const router = express.Router();
 
 const STORE = "Store";
 
@@ -65,13 +66,24 @@ async function delete_store(id){
 router.get('/', checkJWT, function(req, res){
     if (!helper.check_header_type(req)){
         res.status(406).json({
-            "Error": "Not Acceptable"
+            "Error": errors[406]
         });
         return;
     } else {
         get_all_stores(req.auth.sub)
         .then( (stores) => {
-
+            for (i=0; i< stores["stores"].length; i++){
+                const self = req.protocol + "://" + req.get("host") + "/stores/" + stores["stores"][i]["id"];
+                stores["stores"][i]["self"] = self;
+            }
+            const stock = stores["stores"][i]["stock"];
+            if (stock.length > 0){
+                for (j=0; j < stock.length; j++) {
+                    var stock_self = req.protocol + "://" + req.get("host") + "/products/" + stock[j];
+                    const stock_info = { "product_id": stock[j], "self": stock_self };
+                    stock[j] = stock_info;
+                }
+            }
             res.status(200).json(stores);
             return;
         });
@@ -81,7 +93,7 @@ router.get('/', checkJWT, function(req, res){
 router.get('/:id', checkJWT, function(req, res){
     if (!helper.check_header_type(req)){
         res.status(406).json({
-            "Error": "Not Acceptable"
+            "Error": errors[406]
         });
         return;
     } else {
@@ -89,15 +101,25 @@ router.get('/:id', checkJWT, function(req, res){
         .then( (store) => {
             if (store[0] === undefined || store[0] === null){
                 res.status(404).json({
-                    "Error": "No store with this store_id exists"
+                    "Error": errors['404_store']
                 });
                 return;
             } else if (!helper.check_owner(store[0].owner, req.auth.sub)){
                 res.status(403).json({
-                    "Error": "this store is owned by another user"
+                    "Error": errors['403_owner']
                 });
             } else {
-                const self = 
+                const self = req.protocol + "://" + req.get("host") + "/stores/" + id;
+                store[0]["self"] = self;
+
+                const stock = store[0]["stock"]
+                if (stock.length > 0){
+                    for (j=0; j < stock.length; j++) {
+                        var stock_self = req.protocol + "://" + req.get("host") + "/products/" + stock[j];
+                        const stock_info = { "product_id": stock[j], "self": stock_self };
+                        stock[j] = stock_info;
+                    }
+                }
                 res.status(200).json(store[0]);
                 return;
             }
