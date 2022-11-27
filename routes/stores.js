@@ -1,15 +1,31 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const checkJWT = require('./auth').checkJwt;
-const ds = require('./datastore');
+const ds = require('../helpers/datastore');
 const datastore = ds.datastore;
-const errors = require('./errors');
+const errors = require('../helpers/errors');
 const product_imports = require('./products');
 const router = express.Router();
+const { expressjwt: jwt } = require('express-jwt');
+const jwksRsa = require('jwks-rsa');
+const config = require('../helpers/config');
 
+const DOMAIN = config.domain;
 const STORE = "Store";
 
 router.use(bodyParser.json());
+
+checkJWT = jwt({
+    secret: jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: `https://${DOMAIN}/.well-known/jwks.json`
+    }),
+    credentialsRequired: false,
+    // Validate the audience and the issuer.
+    issuer: `https://${DOMAIN}/`,
+    algorithms: ['RS256']
+});
 
 
 /* ------------- Begin Store Model Functions ------------- */

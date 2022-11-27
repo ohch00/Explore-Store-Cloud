@@ -1,9 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const ds = require('./datastore');
+const ds = require('../helpers/datastore');
 const datastore = ds.datastore;
-const errors = require('./errors');
-const e = require('express');
+const errors = require('../helpers/errors');
 const router = express.Router();
 
 const PRODUCT = "Product";
@@ -477,7 +476,9 @@ function check_header_type(req){
 
 /* ------------- End Helper Functions ------------- */
 
-module.exports = router;
-module.exports = get_product();
-module.exports = add_store_to_product();
-module.exports = remove_store_from_product();
+module.exports = {
+    router,
+    get_product,
+    add_store_to_product,
+    remove_store_from_product
+}
