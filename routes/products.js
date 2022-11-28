@@ -4,7 +4,7 @@ const ds = require('../helpers/datastore');
 const datastore = ds.datastore;
 const errors = require('../helpers/errors');
 const router = express.Router();
-const store_exports = require('.stores/');
+const store_exports = require('./stores');
 
 const PRODUCT = "Product";
 
