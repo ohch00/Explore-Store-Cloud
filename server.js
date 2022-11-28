@@ -30,7 +30,7 @@ const o_auth_config = {
 
 app.use(auth(o_auth_config));
 app.use('/', users);
-app.use('/stores', stores);
+app.use('/stores', stores.router);
 app.use('/products', products.router);
 
 app.use(function(err, req, res, next){

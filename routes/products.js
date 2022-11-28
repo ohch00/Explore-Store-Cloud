@@ -4,6 +4,7 @@ const ds = require('../helpers/datastore');
 const datastore = ds.datastore;
 const errors = require('../helpers/errors');
 const router = express.Router();
+const store_exports = require('.stores/');
 
 const PRODUCT = "Product";
 
@@ -26,6 +27,12 @@ async function get_all_products(){
         }
         return results;
     });
+}
+
+async function get_all_products_general(){
+    const q = datastore.createQuery(PRODUCT);
+    const entities = await datastore.runQuery(q);
+    return entities[0].map(ds.fromDatastore);
 }
 
 async function get_product(id){
@@ -376,10 +383,14 @@ router.delete('/:product_id', function(req, res){
                 });
                 return;
             } else {
-                delete_product(req.params.product_id)
-                .then( () => {
+                if (product[0].stock.length > 0){
+                    
+                } else {
+                    delete_product(req.params.product_id)
+                    .then( () => {
                     res.status(204).end();
-                });
+                    });
+                }
             }
         });
     }
@@ -414,6 +425,21 @@ async function remove_store_from_product(product_id, stores){
     update_product = { "name": product.name, "type": product.type, "description": product.description, "stores": stores }
     await datastore.save({ "key": key, "data": update_loads });
     return key;
+}
+
+async function product_deleted(product_id){
+    const entities = await store_exports.get_all_stores_general();
+    const all_stores = entities[0];
+    for (i=0; i < all_stores.length; i++){
+        const store_stock = all_stores[i].stock;
+        for (j=0; j < store_stock.length; j++){
+            if (store_stock[j] === product_id){
+                store_stock.splice(j, 1);
+                break;
+            }
+        }
+        await store_exports.remove_product_from_store(all_stores[i], store_stock);
+    }
 }
 
 /* ------------- End Model Functions ------------- */
@@ -453,16 +479,15 @@ function check_req_body(req_body) {
 
 // 403 - Forbidden; Name already exists in Datastore
 async function check_unique_name(name){
-    const q = datastore.createQuery(PRODUCT);
-    const entities = await datastore.runQuery(q);
-    const products = entities[0];
-
-    for (i=0; i < products.length; i++) {
-        if (name === products[i].name) {
-            return false;
+    get_all_products_general()
+    .then( (products) => {
+        for (i=0; i < products.length; i++) {
+            if (name === products[i].name) {
+                return false;
+            }
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 // 406 - Accept Header is not JSON
@@ -478,6 +503,7 @@ function check_header_type(req){
 
 module.exports = {
     router,
+    get_all_products_general,
     get_product,
     add_store_to_product,
     remove_store_from_product

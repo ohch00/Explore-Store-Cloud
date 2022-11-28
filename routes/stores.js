@@ -47,6 +47,12 @@ async function get_all_stores(owner){
     });
 }
 
+async function get_all_stores_general(){
+    const q = datastore.createQuery(STORE);
+    const entities = await datastore.runQuery(q);
+    return entities[0].map(ds.fromDatastore);
+}
+
 async function get_store(id){
     const key = datastore.key([STORE, parseInt(id,10)]);
     const entity = await datastore.get(key);
@@ -432,9 +438,12 @@ router.delete('/:store_id', checkJWT, function(req, res){
                     "Error": errors['403_owner']
                 });
             } else {
-                delete_store(req.params.store_id)
+                store_deleted(req.params.store_id)
                 .then( () => {
-                    res.status(204).end();
+                    delete_store(req.params.store_id)
+                    .then( () => {
+                        res.status(204).end();
+                    });
                 });
             }
         });
@@ -448,8 +457,6 @@ router.delete('/', function(req, res){
 });
 
 /* ------------- End Controller Functions ------------- */
-
-
 
 
 /* ------------- Begin Relationship Model Functions ------------- */
@@ -471,6 +478,21 @@ async function remove_product_from_store(store_id, stock){
     const update_store = {"name": store.name, "location": store.location, "size": store.size, "owner": store.owner, "stock": stock};
     await datastore.save({ "key": key, "data": update_store });
     return key;
+}
+
+async function store_deleted(store_id){
+    const entities = await product_imports.get_all_products_general();
+    const all_products = entities[0];
+    for (i=0; i < all_products.length; i++){
+        const product_stores = all_products[i].stores;
+        for (j=0; j < product_stores.length; j++){
+            if (product_stores[j] === store_id){
+                product_stores.splice(j, 1);
+                break;
+            }
+        }
+        await product_imports.remove_store_from_product(all_products[i], product_stores);
+    }
 }
 
 /* ------------- End Model Functions ------------- */
@@ -694,16 +716,15 @@ async function check_owner(store_owner, current_user){
 
 // 403 - Forbidden; Name already exists in Datastore
 async function check_unique_name(name){
-    const q = datastore.createQuery(STORE);
-    const entities = await datastore.runQuery(q);
-    const stores = entities[0];
-
-    for (i=0; i < stores.length; i++) {
-        if (name === stores[i].name) {
-            return false;
+    get_all_stores_general()
+    .then( (stores) => {
+        for (i=0; i < stores.length; i++) {
+            if (name === stores[i].name) {
+                return false;
+            }
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 // 406 - Accept Header is not JSON
@@ -716,4 +737,8 @@ function check_header_type(req){
 }
 /* ------------- End Helper Functions ------------- */
 
-module.exports = router;
+module.exports = {
+    router,
+    get_all_stores_general,
+    remove_product_from_store
+}
