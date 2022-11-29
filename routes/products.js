@@ -14,8 +14,8 @@ router.use(bodyParser.json());
 
 /* ------------- Begin Product Model Functions ------------- */
 
-async function get_all_products(){
-    const q = datastore.createQuery(PRODUCT).limit(5);
+async function get_all_products(req){
+    var q = datastore.createQuery(PRODUCT).limit(5);
     var results = {};
     if (Object.keys(req.query).includes("cursor")){
         q = q.start(req.query.cursor);
@@ -25,7 +25,7 @@ async function get_all_products(){
         if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
             results.next = req.protocol + "://" + req.get("host") + "/products?cursor=" + entities[1].endCursor;
         }
-        return results;
+        return results["products"];
     });
 }
 
@@ -67,7 +67,7 @@ async function delete_product(id){
 
 /* ------------- Begin Product Controller Functions ------------- */
 
-router.get('/', function(req, res){
+router.get('/', async function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -75,19 +75,19 @@ router.get('/', function(req, res){
         });
         return;
     } else {
-        get_all_products()
-        .then( (all_products) => {
-            const products = all_products["products"];
+        get_all_products(req)
+        .then( (products) => {
             for (i=0; i< products.length; i++){
                 const self = req.protocol + "://" + req.get("host") + "/products/" + products[i]["id"];
                 products[i]["self"] = self;
-            }
-            const stores = products[i]["stores"];
-            if (stores.length > 0){
-                for (j=0; j < stores.length; j++) {
-                    var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
-                    const store_info = { "store_id": stores[j], "self": store_self };
-                    products[i]["stores"][j] = store_info;
+
+                const stores = products[i]["stores"];
+                if (stores.length > 0){
+                    for (j=0; j < stores.length; j++) {
+                        var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
+                        const store_info = { "store_id": stores[j], "self": store_self };
+                        products[i]["stores"][j] = store_info;
+                    }
                 }
             }
             res.status(200).json(products);
@@ -96,7 +96,7 @@ router.get('/', function(req, res){
     }
 });
 
-router.get('/:id', function(req, res){
+router.get('/:id', async function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -129,7 +129,7 @@ router.get('/:id', function(req, res){
     }
 });
 
-router.post('/', function(req, res){
+router.post('/', async function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -182,7 +182,7 @@ router.post('/', function(req, res){
     }
 });
 
-router.patch('/:product_id', function(req, res){
+router.patch('/:product_id', async function(req, res){
     res.set("Content", "application/json");
     has_name = false;
     has_type = false;
@@ -289,7 +289,7 @@ router.patch('/:product_id', function(req, res){
     }
 });
 
-router.put('/:product_id', function(req, res){
+router.put('/:product_id', async function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -362,7 +362,7 @@ router.put('/', function(req, res){
     });
 });
 
-router.delete('/:product_id', function(req, res){
+router.delete('/:product_id', async function(req, res){
     res.set("Content", "application/json");
     if (req.params.product_id === null || req.params.product_id === undefined){
         res.status(404).json({
@@ -384,11 +384,17 @@ router.delete('/:product_id', function(req, res){
                 return;
             } else {
                 if (product[0].stock.length > 0){
-                    
+                    product_deleted(req.params.product_id)
+                    .then( () => {
+                        delete_product(req.params.product_id)
+                        .then( () => {
+                            res.status(204).end();
+                        });
+                    });
                 } else {
                     delete_product(req.params.product_id)
                     .then( () => {
-                    res.status(204).end();
+                        res.status(204).end();
                     });
                 }
             }
@@ -428,8 +434,8 @@ async function remove_store_from_product(product_id, stores){
 }
 
 async function product_deleted(product_id){
-    const entities = await store_exports.get_all_stores_general();
-    const all_stores = entities[0];
+    const all_stores = await store_exports.get_all_stores_general();
+    //const all_stores = entities[0];
     for (i=0; i < all_stores.length; i++){
         const store_stock = all_stores[i].stock;
         for (j=0; j < store_stock.length; j++){
@@ -479,15 +485,13 @@ function check_req_body(req_body) {
 
 // 403 - Forbidden; Name already exists in Datastore
 async function check_unique_name(name){
-    get_all_products_general()
-    .then( (products) => {
-        for (i=0; i < products.length; i++) {
-            if (name === products[i].name) {
-                return false;
-            }
+    const products = await get_all_products_general();
+    for (i=0; i < products.length; i++) {
+        if (name === products[i].name) {
+            return false;
         }
-        return true;
-    });
+    }
+    return true;
 }
 
 // 406 - Accept Header is not JSON

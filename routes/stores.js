@@ -11,6 +11,7 @@ const config = require('../helpers/config');
 
 const DOMAIN = config.domain;
 const STORE = "Store";
+const LIMIT = 5;
 
 router.use(bodyParser.json());
 
@@ -30,27 +31,49 @@ checkJWT = jwt({
 
 /* ------------- Begin Store Model Functions ------------- */
 
-async function get_all_stores(owner){
-    const q = datastore.createQuery(STORE).limit(5);
+async function get_all_stores(owner, req){    
+    var q = datastore.createQuery(STORE).filter('owner', '=', owner).limit(LIMIT);
     var results = {};
     if (Object.keys(req.query).includes("cursor")){
         q = q.start(req.query.cursor);
+        return get_all_stores_owner(q, req, results)
+        .then((results) => {
+            return results;
+        });
+    } else {
+        return get_total_stores(owner)
+        .then((count) => {
+            results.total_items = count;
+            return get_all_stores_owner(q, req, results)
+            .then((results) => {
+                return results;
+            });
+        });
     }
-    return await datastore.runQuery(q).then( (entities) => {
-        results.stores = entities[0].map(ds.fromDatastore)
-        .filter( item => item.owner === owner);
+    
+}
 
+async function get_total_stores(owner){
+    const q = datastore.createQuery(STORE).filter('owner', '=', owner);
+    return datastore.runQuery(q)
+    .then( (entities) => { return entities[0].map(ds.fromDatastore).length });
+}
+
+async function get_all_stores_general(){
+    const q = datastore.createQuery(STORE);
+    const entities = await datastore.runQuery(q)
+    return entities[0].map(ds.fromDatastore);
+}
+
+async function get_all_stores_owner(q, req, results){
+    return datastore.runQuery(q)
+    .then((entities) => {
+        results.stores = entities[0].map(ds.fromDatastore)
         if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
             results.next = req.protocol + "://" + req.get("host") + "/stores?cursor=" + entities[1].endCursor;
         }
         return results;
     });
-}
-
-async function get_all_stores_general(){
-    const q = datastore.createQuery(STORE);
-    const entities = await datastore.runQuery(q);
-    return entities[0].map(ds.fromDatastore);
 }
 
 async function get_store(id){
@@ -67,14 +90,13 @@ async function get_store(id){
 async function post_store(name, location, size, owner){
     var key = datastore.key(STORE);
 	const new_store = {"name": name, "location": location, "size": size, "owner": owner, "stock": []};
-	return await datastore.save({"key": key, "data": new_store}).then(() => {return key});
+	return datastore.save({"key": key, "data": new_store}).then(() => {return key});
 }
 
-async function patch_put_store(id, name, location, size){
+async function patch_put_store(id, name, location, size, entity){
     const key = datastore.key([STORE, parseInt(id,10)]);
-    const entity = await datastore.get(key)[0];
     const store = {"name": name, "location": location, "size": size, "owner": entity.owner, "stock": entity.stock};
-    return await datastore.save({"key": key, "data": store}).then(() => {return key});
+    return await datastore.save({"key": key, "data": store}).then(() => { return key });
 }
 
 async function delete_store(id){
@@ -99,22 +121,23 @@ router.get('/', checkJWT, function(req, res){
         });
         return;
     } else {
-        get_all_stores(req.auth.sub)
-        .then( (all_stores) => {
-            const stores = all_stores["stores"];
+        get_all_stores(req.auth.sub, req)
+        .then( (entities) => {
+            const stores = entities.stores;
             for (i=0; i < stores.length; i++){
                 const self = req.protocol + "://" + req.get("host") + "/stores/" + stores[i]["id"];
-                stores[i]["self"] = self;
+                entities.stores[i]["self"] = self;
+
+                const stock = stores[i]["stock"];
+                if (stock.length > 0){
+                    for (j=0; j < stock.length; j++) {
+                        var stock_self = req.protocol + "://" + req.get("host") + "/products/" + stock[j];
+                        const stock_info = { "product_id": stock[j], "self": stock_self };
+                        entities.stores[i]["stock"][j] = stock_info;
+                    }
+                }                    
             }
-            const stock = stores[i]["stock"];
-            if (stock.length > 0){
-                for (j=0; j < stock.length; j++) {
-                    var stock_self = req.protocol + "://" + req.get("host") + "/products/" + stock[j];
-                    const stock_info = { "product_id": stock[j], "self": stock_self };
-                    stores[i]["stock"][j] = stock_info;
-                }
-            }
-            res.status(200).json(stores);
+            res.status(200).json(entities);
             return;
         });
     }
@@ -133,20 +156,20 @@ router.get('/:id', checkJWT, function(req, res){
         });
         return;
     } else {
-        get_store(id)
+        get_store(req.params.id)
         .then( (store) => {
             if (store[0] === undefined || store[0] === null){
                 res.status(404).json({
                     "Error": errors['404_store']
                 });
                 return;
-            } else if (!helper.check_owner(store[0].owner, req.auth.sub)){
+            } else if (!check_owner(store[0].owner, req.auth.sub)){
                 res.status(403).json({
                     "Error": errors['403_owner']
                 });
                 return;
             } else {
-                const self = req.protocol + "://" + req.get("host") + "/stores/" + id;
+                const self = req.protocol + "://" + req.get("host") + "/stores/" + req.params.id;
                 store[0]["self"] = self;
                 const stock = store[0]["stock"]
                 if (stock.length > 0){
@@ -194,7 +217,7 @@ router.post('/', checkJWT, function(req, res){
                 return;
             } else {
                 post_store(req.body.name, req.body.location, req.body.size, req.auth.sub)
-                .then( (key)  => {
+                .then( (key)  => {                    
                     const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
                     res.status(201).json({
                     "id": key.id,
@@ -208,17 +231,29 @@ router.post('/', checkJWT, function(req, res){
                     return;
                 });
             }
+            return;
         });
         
     }
 });
 
-router.patch('/:store_id', checkJWT, function(req, res){
+router.patch('/:store_id', checkJWT, async function(req, res){
     res.set("Content", "application/json");
     var has_name = false;
     var has_location = false;
     var has_size = false;
+    var unique_name = false;
 
+    if (req.body.name !== null && req.body.name !== undefined){
+        if (!check_invalid_name_location(req.body.name)) {
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+        } else {
+            var unique_name = check_unique_name(req.body.name);
+        }
+    }
     if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
@@ -266,73 +301,66 @@ router.patch('/:store_id', checkJWT, function(req, res){
             has_size = true;
         }
     }
-    if (req.body.name !== null || req.body.name === undefined){
-        if (!check_invalid_name_location(req.body.name)) {
-            res.status(400).json({
-                "Error": errors['400_patch']
+    var get_store_info = get_store(req.params.store_id);
+    Promise.all([unique_name, get_store_info])
+    .then( (results) => {
+        const result = results[0];
+        const store = results[1];
+        if (!result){
+            res.status(403).json({
+                "Error": errors['403_owner_and_name']
             });
             return;
         } else {
-            check_unique_name(req.body.name)
-            .then( (result) => {
-                if (!result){
-                    res.status(403).json({
-                        "Error": errors['403_owner_and_name']
-                    });
-                    return;
-                } else {
-                    has_name = true;
-                }
-            });
+            has_name = true;
         }
-    }
-    if (has_name === true && has_location === true && has_size === true) {
-        res.status(400).json({
-            "Error": errors['400_patch']
-        });
-        return;
-    } else {
-        get_store(req.params.store_id)
-        .then( (store) => {
-            if (store[0] === null || store[0] === undefined){
-                res.status(404).json({
-                    "Error": errors['404_store']
+
+        if (has_name && has_location && has_size){
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return; 
+        }
+        else if (store[0] === null || store[0] === undefined){
+            res.status(404).json({
+                "Error": errors['404_store']
+            });
+            return;
+        } else if (!check_owner(store[0].owner, req.auth.sub)){
+            res.status(403).json({
+                "Error": errors['403_owner_and_name']
+            });
+            return;
+        } else {
+            var update_name = store[0].name;
+            var update_location = store[0].location;
+            var update_size = store[0].size;
+
+            if (has_name){
+                update_name = req.body.name;
+            }
+            if (has_location){
+                update_location = req.body.location;
+            }
+            if (has_size){
+                update_size = req.body.size;
+            }
+            patch_put_store(req.params.store_id, update_name, update_location, update_size, store[0])
+            .then( (key) => {
+                const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
+                res.status(200).json({
+                    "id": key.id,
+                    "name": update_name,
+                    "location": update_location,
+                    "size": update_size,
+                    "stock": store[0].stock,
+                    "owner": store[0].owner,
+                    "self": self
                 });
                 return;
-            } else if (!check_owner(store[0].owner, req.auth.sub)){
-                res.status(403).json({
-                    "Error": errors['403_owner_and_name']
-                });
-            } else {
-                var update_name = store[0].name;
-                var update_location = store[0].location;
-                var update_size = store[0].size;
-
-                if (has_name){
-                    update_name = req.body.name;
-                }
-                if (has_location){
-                    update_location = req.body.location;
-                }
-                if (has_size){
-                    update_size = req.body.size;
-                }
-                patch_put_store(req.params.store_id, update_name, update_location, update_size)
-                .then( (key) => {
-                    const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
-                    res.status(200).json({
-                        "id": key.id,
-                        "name": update_name,
-                        "location": update_location,
-                        "size": update_size,
-                        "stock": store[0].stock,
-                        "owner": store[0].owner,
-                        "self": self
-                    });
-                });
-            }
-        });
-    }
+            });
+        }
+    });
 });
 
 router.put('/:store_id', checkJWT, function(req, res){
@@ -362,7 +390,7 @@ router.put('/:store_id', checkJWT, function(req, res){
         });
         return;
     } else {
-        check_unique_name(req.params.name)
+        check_unique_name(req.body.name)
         .then( (result) => {
             if (!result){
                 res.status(403).json({
@@ -381,8 +409,9 @@ router.put('/:store_id', checkJWT, function(req, res){
                         res.status(403).json({
                             "Error": errors['403_owner_and_name']
                         });
+                        return;
                     } else {
-                        patch_put_store(req.params.store_id, req.body.name, req.body.location, req.body.size)
+                        patch_put_store(req.params.store_id, req.body.name, req.body.location, req.body.size, store[0])
                         .then( (key) => {
                             const self = req.protocol + "://" + req.get("host") + "/stores/" + key.id;
                             res.status(200).json({
@@ -394,6 +423,7 @@ router.put('/:store_id', checkJWT, function(req, res){
                                 "owner": store[0].owner,
                                 "self": self
                             });
+                            return;
                         });
                     }
                 });
@@ -406,6 +436,7 @@ router.put('/', function(req, res){
     res.status(405).json({
         "Error": errors['405_edit']
     });
+    return;
 });
 
 router.delete('/:store_id', checkJWT, function(req, res){
@@ -419,7 +450,7 @@ router.delete('/:store_id', checkJWT, function(req, res){
         res.status(406).json({
             "Error": errors[406]
         });
-        return
+        return;
     } else if (req.auth === null || req.auth === undefined) {
         res.status(401).json({
             "Error": errors[401]
@@ -481,8 +512,8 @@ async function remove_product_from_store(store_id, stock){
 }
 
 async function store_deleted(store_id){
-    const entities = await product_imports.get_all_products_general();
-    const all_products = entities[0];
+    const all_products = await product_imports.get_all_products_general();
+    //const all_products = entities[0];
     for (i=0; i < all_products.length; i++){
         const product_stores = all_products[i].stores;
         for (j=0; j < product_stores.length; j++){
@@ -499,7 +530,7 @@ async function store_deleted(store_id){
 
 /* ------------- Begin Relationship Controller Functions ------------- */
 
-router.patch('/:store_id/products/:product_id', function(req, res){
+router.patch('/:store_id/products/:product_id', async function(req, res){
     res.set("Content", "application/json");
     if (req.params.store_id === null || req.params.store_id === undefined){
         res.status(404).json({
@@ -572,7 +603,7 @@ router.patch('/:store_id/products/:product_id', function(req, res){
     }
 });
 
-router.delete('/:store_id/products/:product_id', function(req, res){
+router.delete('/:store_id/products/:product_id', async function(req, res){
     res.set("Content", "application/json");
     if (req.params.store_id === null || req.params.store_id === undefined){
         res.status(404).json({
@@ -707,7 +738,7 @@ function check_req_body(req_body) {
 }
 
 // 403 - Forbidden; Store is not assigned to the current user
-async function check_owner(store_owner, current_user){
+function check_owner(store_owner, current_user){
     if (store_owner === current_user){
         return true;
     }
@@ -716,7 +747,14 @@ async function check_owner(store_owner, current_user){
 
 // 403 - Forbidden; Name already exists in Datastore
 async function check_unique_name(name){
-    get_all_stores_general()
+    var stores = await get_all_stores_general();
+    for (i=0; i < stores.length; i++) {
+        if (name === stores[i].name) {
+            return false;
+        }
+    }
+    return true;
+    /*return get_all_stores_general()
     .then( (stores) => {
         for (i=0; i < stores.length; i++) {
             if (name === stores[i].name) {
@@ -724,7 +762,7 @@ async function check_unique_name(name){
             }
         }
         return true;
-    });
+    });*/
 }
 
 // 406 - Accept Header is not JSON
@@ -735,6 +773,7 @@ function check_header_type(req){
         return true;
     }
 }
+
 /* ------------- End Helper Functions ------------- */
 
 module.exports = {

@@ -38,14 +38,26 @@ router.get('/login', function(req, res){
 });
 
 router.get('/user', requiresAuth(), function(req, res){
-    add_user(req.oidc.sub)
-    .then( () => {
-        res.send("JWT Token: " + req.oidc.idToken);
+    get_all_users()
+    .then( (users) => {
+        for (i=0; i < users.length; i++){
+            if (req.oidc.sub === users[i].name){
+                res.status(200);
+                res.send("JWT Token: " + req.oidc.idToken);
+                return;
+            }
+        }
+        add_user(req.oidc.user.sub)
+        .then( () => {
+            res.status(200);
+            res.send("JWT Token: " + req.oidc.idToken);
+            return;
+        });
     });
 });
 
 router.get('/users', function(req, res){
-    if (check_header_type(req)){
+    if (!check_header_type(req)){
         res.status(406).json({
             "Error": "Not Acceptable"
         });
