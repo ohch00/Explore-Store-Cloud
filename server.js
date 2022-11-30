@@ -34,6 +34,7 @@ app.use(auth(o_auth_config));
 app.use('/', users);
 app.use('/stores', stores.router);
 app.use('/products', products.router);
+app.set('view engine', 'ejs');
 
 app.use(function(err, req, res, next){
     if (err.name === "UnauthorizedError") {

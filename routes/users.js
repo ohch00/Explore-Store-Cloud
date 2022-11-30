@@ -43,7 +43,10 @@ router.get('/user', requiresAuth(), function(req, res){
         if (result){
             add_user(req.oidc.user.sub);
         }
-        res.status(200).send("JWT Token: " + req.oidc.idToken);
+        res.status(200).render('users.ejs', {
+            jwt_token: req.oidc.idToken
+        });
+        return;
     });
 });
 
