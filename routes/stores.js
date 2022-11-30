@@ -61,12 +61,6 @@ async function get_total_stores(owner){
     .then((entities) => { return entities[0].map(ds.fromDatastore).length });
 }
 
-async function get_all_stores_general(){
-    const q = datastore.createQuery(STORE);
-    return datastore.runQuery(q)
-    .then((entities) => { return entities[0].map(ds.fromDatastore) });
-}
-
 async function get_store(id){
     const key = datastore.key([STORE, parseInt(id,10)]);
     const entity = await datastore.get(key);
@@ -461,9 +455,9 @@ router.delete('/:store_id', checkJWT, function(req, res){
                 });
             } else {
                 store_deleted(req.params.store_id)
-                .then( () => {
+                .then(() => {
                     delete_store(req.params.store_id)
-                    .then( () => {
+                    .then(() => {
                         res.status(204).end();
                     });
                 });
@@ -493,18 +487,8 @@ async function add_product_to_store(store_id, product_id){
     return key;
 }
 
-async function remove_product_from_store(store_id, stock){
-    const key = datastore.key([STORE, parseInt(store_id,10)]);
-    const entity = await datastore.get(key);
-    var store = entity[0];
-    const update_store = {"name": store.name, "location": store.location, "size": store.size, "owner": store.owner, "stock": stock};
-    await datastore.save({ "key": key, "data": update_store });
-    return key;
-}
-
 async function store_deleted(store_id){
     const all_products = await product_imports.get_all_products_general();
-    //const all_products = entities[0];
     for (i=0; i < all_products.length; i++){
         const product_stores = all_products[i].stores;
         for (j=0; j < product_stores.length; j++){
@@ -513,24 +497,26 @@ async function store_deleted(store_id){
                 break;
             }
         }
-        await product_imports.remove_store_from_product(all_products[i], product_stores);
+        await product_imports.remove_store_from_product(all_products[i].id, product_stores);
     }
 }
+
+
 
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Relationship Controller Functions ------------- */
 
-router.patch('/:store_id/products/:product_id', async function(req, res){
+router.patch('/:store_id/products/:product_id', checkJWT, function(req, res){
     res.set("Content", "application/json");
     if (req.params.store_id === null || req.params.store_id === undefined){
         res.status(404).json({
-            "Error": errors['404_store']
+            "Error": errors["404_relationship"]
         });
         return;
     } else if (req.params.product_id === null || req.params.product_id === undefined){
         res.status(404).json({
-            "Error": errors['404_product']
+            "Error": errors["404_relationship"]
         });
         return;
     } else if (!check_header_type(req)){
@@ -548,7 +534,7 @@ router.patch('/:store_id/products/:product_id', async function(req, res){
         .then( (store) => {
             if (store[0] === null || store[0] === undefined){
                 res.status(404).json({
-                    "Error": errors['404_store']
+                    "Error": errors["404_relationship"]
                 });
                 return;
             } else if (!check_owner(store[0].owner, req.auth.sub)){
@@ -569,7 +555,7 @@ router.patch('/:store_id/products/:product_id', async function(req, res){
                 .then( (product) => {
                     if (product[0] === null || product[0] === undefined){
                         res.status(404).json({
-                            "Error": errors['404_product']
+                            "Error": errors["404_relationship"]
                         });
                         return;
                     }
@@ -594,16 +580,16 @@ router.patch('/:store_id/products/:product_id', async function(req, res){
     }
 });
 
-router.delete('/:store_id/products/:product_id', async function(req, res){
+router.delete('/:store_id/products/:product_id', checkJWT, function(req, res){
     res.set("Content", "application/json");
     if (req.params.store_id === null || req.params.store_id === undefined){
         res.status(404).json({
-            "Error": errors['404_store']
+            "Error": errors["404_relationship"]
         });
         return;
     } else if (req.params.product_id === null || req.params.product_id === undefined){
         res.status(404).json({
-            "Error": errors['404_product']
+            "Error": errors["404_relationship"]
         });
         return;
     } else if (!check_header_type(req)){
@@ -621,7 +607,7 @@ router.delete('/:store_id/products/:product_id', async function(req, res){
         .then( (store) => {
             if (store[0] === null || store[0] === undefined){
                 res.status(404).json({
-                    "Error": errors['404_store']
+                    "Error": errors["404_relationship"]
                 });
                 return;
             } else if (!check_owner(store[0].owner, req.auth.sub)){
@@ -639,45 +625,45 @@ router.delete('/:store_id/products/:product_id', async function(req, res){
                         break;
                     }
                 }
-                if (!has_product){
-                    res.status(403).json({
-                        "Error": errors['403_no_stock']
-                    });
-                    return;
-                } else {
-                    product_imports.get_product(req.params.product_id)
-                    .then( (product) => {
-                        if (product[0] === null || product[0] === undefined){
-                            res.status(404).json({
-                                "Error": errors['404_product']
-                            });
-                            return;
+                product_imports.get_product(req.params.product_id)
+                .then( (product) => {
+                    if (product[0] === null || product[0] === undefined){
+                        res.status(404).json({
+                            "Error": errors["404_relationship"]
+                        });
+                        return;
+                    }
+                    if (!has_product){
+                        res.status(403).json({
+                            "Error": errors['403_no_stock']
+                        });
+                        return;
+                    }
+                    var has_store = false;
+                    var product_stores = product[0].stores;
+                    for (i=0; i < product_stores.length; i++){
+                        if (product_stores[i] === req.params.store_id){
+                            product_stores.splice(i, 1);
+                            has_store = true;
+                            break;
                         }
-                        var has_store = false;
-                        var product_stores = product[0].stores;
-                        for (i=0; i < product_stores.length; i++){
-                            if (product_stores[i] === req.params.store_id){
-                                product_stores.splice(i, 1);
-                                has_store = true;
-                                break;
-                            }
-                        }
-                        if (!has_store){
-                            res.status(403).json({
-                                "Error": errors['403_no_stock']
-                            });
-                            return;
-                        } else {
-                            remove_product_from_store(req.params.store_id, store_stock)
+                    }
+                    if (!has_store){
+                        res.status(403).json({
+                            "Error": errors['403_no_stock']
+                        });
+                        return;
+                    } else {
+                        ds.remove_product_from_store(req.params.store_id, store_stock)
+                        .then( () => {
+                            product_imports.remove_store_from_product(req.params.product_id, product_stores)
                             .then( () => {
-                                product_imports.remove_store_from_product(req.params.product_id, product_stores)
-                                .then( () => {
-                                    res.status(204).end();
-                                });
+                                res.status(204).end();
                             });
-                        }
-                    });
-                }
+                        });
+                    }
+                });
+                
             }
         });
     }
@@ -738,7 +724,7 @@ function check_owner(store_owner, current_user){
 
 // 403 - Forbidden; Name already exists in Datastore
 async function check_unique_name(name){
-    var stores = await get_all_stores_general();
+    var stores = await ds.get_all_stores_general();
     for (i=0; i < stores.length; i++) {
         if (name === stores[i].name) {
             return false;
@@ -759,7 +745,5 @@ function check_header_type(req){
 /* ------------- End Helper Functions ------------- */
 
 module.exports = {
-    router,
-    get_all_stores_general,
-    remove_product_from_store
+    router
 }

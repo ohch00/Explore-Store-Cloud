@@ -4,7 +4,6 @@ const ds = require('../helpers/datastore');
 const datastore = ds.datastore;
 const errors = require('../helpers/errors');
 const router = express.Router();
-const store_exports = require('./stores');
 
 const PRODUCT = "Product";
 
@@ -78,6 +77,20 @@ async function delete_product(id){
     return await datastore.delete(key);
 }
 
+async function product_deleted(product_id){
+    const all_stores = await ds.get_all_stores_general();
+    for (i=0; i < all_stores.length; i++){
+        const store_stock = all_stores[i].stock;
+        for (j=0; j < store_stock.length; j++){
+            if (store_stock[j] === product_id){
+                store_stock.splice(j, 1);
+                break;
+            }
+        }
+        await ds.remove_product_from_store(all_stores[i].id, store_stock);
+    }
+}
+
 /* ------------- End Model Functions ------------- */
 
 /* ------------- Begin Product Controller Functions ------------- */
@@ -134,8 +147,8 @@ router.get('/:id', function(req, res){
                 if (stores.length > 0){
                     for (j=0; j < stores.length; j++) {
                         var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
-                        const store_info = { "store_id": stock[j], "self": store_self };
-                        stock[j] = store_info;
+                        const store_info = { "store_id": stores[j], "self": store_self };
+                        stores[j] = store_info;
                     }
                 }
                 res.status(200).json(product[0]);
@@ -449,23 +462,8 @@ async function remove_store_from_product(product_id, stores){
     const entity = await datastore.get(key);
     var product = entity[0];
     update_product = { "name": product.name, "type": product.type, "description": product.description, "stores": stores }
-    await datastore.save({ "key": key, "data": update_loads });
+    await datastore.save({ "key": key, "data": update_product });
     return key;
-}
-
-async function product_deleted(product_id){
-    const all_stores = await store_exports.get_all_stores_general();
-    //const all_stores = entities[0];
-    for (i=0; i < all_stores.length; i++){
-        const store_stock = all_stores[i].stock;
-        for (j=0; j < store_stock.length; j++){
-            if (store_stock[j] === product_id){
-                store_stock.splice(j, 1);
-                break;
-            }
-        }
-        await store_exports.remove_product_from_store(all_stores[i], store_stock);
-    }
 }
 
 /* ------------- End Model Functions ------------- */
