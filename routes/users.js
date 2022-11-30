@@ -39,8 +39,8 @@ router.get('/login', function(req, res){
 
 router.get('/user', requiresAuth(), function(req, res){
     check_new_user(req.oidc.user.sub)
-    .then( (result) => {
-        if (!result){
+    .then((result) => {
+        if (result){
             add_user(req.oidc.user.sub);
         }
         res.status(200).send("JWT Token: " + req.oidc.idToken);
