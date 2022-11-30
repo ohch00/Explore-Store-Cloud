@@ -17,22 +17,37 @@ router.use(bodyParser.json());
 async function get_all_products(req){
     var q = datastore.createQuery(PRODUCT).limit(5);
     var results = {};
+    var total_products = false;
+
     if (Object.keys(req.query).includes("cursor")){
         q = q.start(req.query.cursor);
-    }
-    return await datastore.runQuery(q).then( (entities) => {
-        results.stores = entities[0].map(ds.fromDatastore);
+    } else { var total_products = get_total_products()}
+
+    return Promise.all([total_products, datastore.runQuery(q)])
+    .then((resolved) => {
+        var total_count = resolved[0];
+        if (total_count !== false){
+            results.total_count = total_count;
+        }
+        var entities = resolved[1];
+        results.products = entities[0].map(ds.fromDatastore);
         if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
             results.next = req.protocol + "://" + req.get("host") + "/products?cursor=" + entities[1].endCursor;
         }
-        return results["products"];
+        return results;
     });
+}
+
+async function get_total_products(){
+    const q = datastore.createQuery(PRODUCT);
+    return datastore.runQuery(q)
+    .then((entities) => { return entities[0].map(ds.fromDatastore).length });
 }
 
 async function get_all_products_general(){
     const q = datastore.createQuery(PRODUCT);
-    const entities = await datastore.runQuery(q);
-    return entities[0].map(ds.fromDatastore);
+    return datastore.runQuery(q)
+    .then((entities) => { return entities[0].map(ds.fromDatastore) });
 }
 
 async function get_product(id){
@@ -49,13 +64,13 @@ async function get_product(id){
 async function post_product(name, type, description){
     var key = datastore.key(PRODUCT);
 	const new_product = {"name": name, "type": type, "description": description, "stores": []};
-	return await datastore.save({"key": key, "data": new_product}).then(() => {return key});
+	return await datastore.save({"key": key, "data": new_product}).then(() => { return key });
 }
 
-async function patch_put_product(id, name, type, description){
+async function patch_put_product(id, name, type, description, stores){
     const key = datastore.key([PRODUCT, parseInt(id,10)]);
-    const product = {"name": name, "type": type, "description": description};
-    return await datastore.save({"key": key, "data": product}).then(() => {return key});
+    const product = {"name": name, "type": type, "description": description, "stores": stores };
+    return await datastore.save({"key": key, "data": product}).then(() => { return key });
 }
 
 async function delete_product(id){
@@ -67,7 +82,7 @@ async function delete_product(id){
 
 /* ------------- Begin Product Controller Functions ------------- */
 
-router.get('/', async function(req, res){
+router.get('/', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -76,27 +91,28 @@ router.get('/', async function(req, res){
         return;
     } else {
         get_all_products(req)
-        .then( (products) => {
+        .then((entities) => {
+            const products = entities.products;
             for (i=0; i< products.length; i++){
                 const self = req.protocol + "://" + req.get("host") + "/products/" + products[i]["id"];
-                products[i]["self"] = self;
+                entities.products[i]["self"] = self;
 
                 const stores = products[i]["stores"];
                 if (stores.length > 0){
                     for (j=0; j < stores.length; j++) {
                         var store_self = req.protocol + "://" + req.get("host") + "/stores/" + stores[j];
                         const store_info = { "store_id": stores[j], "self": store_self };
-                        products[i]["stores"][j] = store_info;
+                        entities.products[i]["stores"][j] = store_info;
                     }
                 }
             }
-            res.status(200).json(products);
+            res.status(200).json(entities);
             return;
         });
     }
 });
 
-router.get('/:id', async function(req, res){
+router.get('/:id', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -104,7 +120,7 @@ router.get('/:id', async function(req, res){
         });
         return;
     } else {
-        get_product(id)
+        get_product(req.params.id)
         .then( (product) => {
             if (product[0] === undefined || product[0] === null){
                 res.status(404).json({
@@ -112,7 +128,7 @@ router.get('/:id', async function(req, res){
                 });
                 return;
             } else {
-                const self = req.protocol + "://" + req.get("host") + "/products/" + id;
+                const self = req.protocol + "://" + req.get("host") + "/products/" + req.params.id;
                 product[0]["self"] = self;
                 const stores = product[0]["stores"]
                 if (stores.length > 0){
@@ -129,7 +145,7 @@ router.get('/:id', async function(req, res){
     }
 });
 
-router.post('/', async function(req, res){
+router.post('/', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -149,12 +165,12 @@ router.post('/', async function(req, res){
         .then( (result) => {
             if (!result){
                 res.status(403).json({
-                    "Error": errors['403_name']
+                    "Error": errors['403_name_product']
                 });
                 return;
             } else {
                 var new_description = req.body.description;
-                if (new_description !== null && new_description !== undefined){
+                if (new_description !== null && new_description !== undefined && new_description !== ""){
                     if(!check_invalid_string(new_description)){
                         res.status(400).json({
                             "Error": errors[400]
@@ -178,14 +194,27 @@ router.post('/', async function(req, res){
                     return;
                 });
             }
+            return;
         });
     }
 });
 
 router.patch('/:product_id', async function(req, res){
     res.set("Content", "application/json");
-    has_name = false;
-    has_type = false;
+    var has_name = false;
+    var has_type = false;
+    var unique_name = false;
+
+    if (req.body.name !== null && req.body.name !== undefined){
+        if (!check_invalid_string(req.body.name)) {
+            res.status(400).json({
+                "Error": errors['400_patch']
+            });
+            return;
+        } else {
+            unique_name = check_unique_name(req.body.name);
+        }
+    }
     if (!check_header_type(req)){
         res.status(406).json({
             "Error": errors[406]
@@ -218,78 +247,67 @@ router.patch('/:product_id', async function(req, res){
             has_type = true;            
         }
     }
-    if (req.body.name !== null || req.body.name === undefined){
-        if (!check_invalid_string(req.body.name)) {
+    var get_product_info = get_product(req.params.product_id);
+    Promise.all([unique_name, get_product_info])
+    .then((results) => {
+        const result = results[0];
+        const product = results[1];
+        if (!result){
+            res.status(403).json({
+                "Error": errors['403_name_product']
+            });
+            return;
+        } else { has_name = true }
+        if (has_name === true && has_type === true) {
             res.status(400).json({
                 "Error": errors['400_patch']
             });
             return;
+        } else if (product[0] === null || product[0] === undefined){
+            res.status(404).json({
+                "Error": errors['404_product']
+            });
+            return;
         } else {
-            check_unique_name(req.body.name)
-            .then( (result) => {
-                if (!result){
-                    res.status(403).json({
-                        "Error": errors['403_name']
+            var update_name = product[0].name;
+            var update_type = product[0].type;
+            var update_description = product[0].description;
+
+            if (has_name){
+                update_name = req.body.name;
+            }
+            if (has_type){
+                update_type = req.body.type;
+            }
+            if (req.body.description === ""){
+                update_description = "";
+            } else if (req.body.description !== null && req.body.description !== undefined && req.body.description !== ""){
+                if (!check_invalid_string(req.body.description)){
+                    res.status(400).json({
+                        "Error": errors['400_patch']
                     });
                     return;
                 } else {
-                    has_name = true;
+                    update_description = req.body.description;
                 }
+            }
+            patch_put_product(req.params.product_id, update_name, update_type, update_description, product[0].stores)
+            .then((key) => {
+                const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
+                res.status(200).json({
+                    "id": key.id,
+                    "name": update_name,
+                    "type": update_type,
+                    "description": update_description,
+                    "stores": product[0].stores,
+                    "self": self
+                });
             });
         }
-    }
-    if (has_name === true && has_type === true) {
-        res.status(400).json({
-            "Error": errors['400_patch']
-        });
-        return;
-    } else {
-        get_product(req.params.product_id)
-        .then( (product) => {
-            if (product[0] === null || product[0] === undefined){
-                res.status(404).json({
-                    "Error": errors['404_product']
-                });
-                return;
-            } else {
-                var update_name = product[0].name;
-                var update_type = product[0].type;
-                var update_description = product[0].description;
-
-                if (has_name){
-                    update_name = req.body.name;
-                }
-                if (has_type){
-                    update_type = req.body.type;
-                }
-                if (req.body.description !== null && req.body.description !== undefined){
-                    if (!check_invalid_string(req.body.description)){
-                        res.status(400).json({
-                            "Error": errors['400_patch']
-                        });
-                        return;
-                    } else {
-                        update_description = req.body.description;
-                    }
-                }
-                patch_put_store(req.params.product_id, update_name, update_type, update_description)
-                .then( (key) => {
-                    const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
-                    res.status(200).json({
-                        "id": key.id,
-                        "name": update_name,
-                        "type": update_type,
-                        "description": update_description,
-                        "stores": product[0].stores,
-                        "self": self
-                    });
-                });
-            }
-        })
-    }
+    });
 });
 
-router.put('/:product_id', async function(req, res){
+router.put('/:product_id', function(req, res){
     res.set("Content", "application/json");
     if (!check_header_type(req)){
         res.status(406).json({
@@ -311,39 +329,41 @@ router.put('/:product_id', async function(req, res){
             return;        
     } else {
         check_unique_name(req.body.name)
-        .then( (result) => {
+        .then((result) => {
             if (!result){
                 res.status(403).json({
-                    "Error": errors['403_name']
+                    "Error": errors['403_name_product']
                 });
                 return;
             } else {
-                var new_description = req.body.description;
-                if (new_description !== null && new_description !== undefined){
-                    if (!check_invalid_string(new_description)){
-                        res.status(400).json({
-                            "Error": errors[400]
-                        });
-                        return;
-                    }
-                } else {
-                    new_description = "";
-                }
                 get_product(req.params.product_id)
-                .then( (product) => {
+                .then((product) => {
                     if (product[0] === null || product[0] === undefined){
                         res.status(404).json({
                             "Error": errors['404_product']
                         });
                     } else {
-                        patch_put_product(req.body.name, req.body.type, new_description)
-                        .then( (key)  => {
+                        var update_description = product[0].description;
+                        if (req.body.description === ""){
+                            update_description = "";
+                        } else if (req.body.description !== null && req.body.description !== undefined && req.body.description !== ""){
+                            if (!check_invalid_string(req.body.description)){
+                                res.status(400).json({
+                                    "Error": errors[400]
+                                });
+                                return;
+                            } else {
+                                update_description = req.body.description;
+                            }
+                        }                        
+                        patch_put_product(req.params.product_id, req.body.name, req.body.type, update_description, product[0].stores)
+                        .then((key) => {
                             const self = req.protocol + "://" + req.get("host") + "/products/" + key.id;
                             res.status(200).json({
                                 "id": key.id,
                                 "name": req.body.name,
                                 "type": req.body.type,
-                                "description": new_description,
+                                "description": update_description,
                                 "stores": product[0].stores,
                                 "self": self
                             });
@@ -362,7 +382,7 @@ router.put('/', function(req, res){
     });
 });
 
-router.delete('/:product_id', async function(req, res){
+router.delete('/:product_id', function(req, res){
     res.set("Content", "application/json");
     if (req.params.product_id === null || req.params.product_id === undefined){
         res.status(404).json({
@@ -376,24 +396,24 @@ router.delete('/:product_id', async function(req, res){
         return
     } else {
         get_product(req.params.product_id)
-        .then( (product) => {
+        .then((product) => {
             if (product[0] === null || product[0] === undefined){
                 res.status(404).json({
                     "Error": errors['404_product']
                 });
                 return;
             } else {
-                if (product[0].stock.length > 0){
+                if (product[0].stores.length > 0){
                     product_deleted(req.params.product_id)
-                    .then( () => {
+                    .then(() => {
                         delete_product(req.params.product_id)
-                        .then( () => {
+                        .then(() => {
                             res.status(204).end();
                         });
                     });
                 } else {
                     delete_product(req.params.product_id)
-                    .then( () => {
+                    .then(() => {
                         res.status(204).end();
                     });
                 }

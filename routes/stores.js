@@ -31,49 +31,40 @@ checkJWT = jwt({
 
 /* ------------- Begin Store Model Functions ------------- */
 
-async function get_all_stores(owner, req){    
+async function get_all_stores(owner, req){
     var q = datastore.createQuery(STORE).filter('owner', '=', owner).limit(LIMIT);
     var results = {};
+    var total_stores = false;
+
     if (Object.keys(req.query).includes("cursor")){
         q = q.start(req.query.cursor);
-        return get_all_stores_owner(q, req, results)
-        .then((results) => {
-            return results;
-        });
-    } else {
-        return get_total_stores(owner)
-        .then((count) => {
-            results.total_items = count;
-            return get_all_stores_owner(q, req, results)
-            .then((results) => {
-                return results;
-            });
-        });
-    }
-    
-}
+    } else { total_stores = get_total_stores(owner)}
 
-async function get_total_stores(owner){
-    const q = datastore.createQuery(STORE).filter('owner', '=', owner);
-    return datastore.runQuery(q)
-    .then( (entities) => { return entities[0].map(ds.fromDatastore).length });
-}
-
-async function get_all_stores_general(){
-    const q = datastore.createQuery(STORE);
-    const entities = await datastore.runQuery(q)
-    return entities[0].map(ds.fromDatastore);
-}
-
-async function get_all_stores_owner(q, req, results){
-    return datastore.runQuery(q)
-    .then((entities) => {
-        results.stores = entities[0].map(ds.fromDatastore)
+    return Promise.all([total_stores, datastore.runQuery(q)])
+    .then((resolved) => {
+        const total_count = resolved[0];
+        if (total_count !== false){
+            results.total_count = total_count;
+        }
+        const entities = resolved[1];
+        results.stores = entities[0].map(ds.fromDatastore);
         if (entities[1].moreResults !== ds.Datastore.NO_MORE_RESULTS){
             results.next = req.protocol + "://" + req.get("host") + "/stores?cursor=" + entities[1].endCursor;
         }
         return results;
     });
+}
+
+async function get_total_stores(owner){
+    const q = datastore.createQuery(STORE).filter('owner', '=', owner);
+    return datastore.runQuery(q)
+    .then((entities) => { return entities[0].map(ds.fromDatastore).length });
+}
+
+async function get_all_stores_general(){
+    const q = datastore.createQuery(STORE);
+    return datastore.runQuery(q)
+    .then((entities) => { return entities[0].map(ds.fromDatastore) });
 }
 
 async function get_store(id){
@@ -90,7 +81,7 @@ async function get_store(id){
 async function post_store(name, location, size, owner){
     var key = datastore.key(STORE);
 	const new_store = {"name": name, "location": location, "size": size, "owner": owner, "stock": []};
-	return datastore.save({"key": key, "data": new_store}).then(() => {return key});
+	return datastore.save({"key": key, "data": new_store}).then(() => { return key });
 }
 
 async function patch_put_store(id, name, location, size, entity){
@@ -212,7 +203,7 @@ router.post('/', checkJWT, function(req, res){
         .then( (result) => {
             if (!result){
                 res.status(403).json({
-                    "Error": errors['403_name']
+                    "Error": errors['403_name_store']
                 });
                 return;
             } else {
@@ -251,7 +242,7 @@ router.patch('/:store_id', checkJWT, async function(req, res){
             });
             return;
         } else {
-            var unique_name = check_unique_name(req.body.name);
+            unique_name = check_unique_name(req.body.name);
         }
     }
     if (!check_header_type(req)){
