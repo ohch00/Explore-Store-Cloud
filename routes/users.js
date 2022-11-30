@@ -38,21 +38,12 @@ router.get('/login', function(req, res){
 });
 
 router.get('/user', requiresAuth(), function(req, res){
-    get_all_users()
-    .then( (users) => {
-        for (i=0; i < users.length; i++){
-            if (req.oidc.sub === users[i].name){
-                res.status(200);
-                res.send("JWT Token: " + req.oidc.idToken);
-                return;
-            }
+    check_new_user(req.oidc.user.sub)
+    .then( (result) => {
+        if (!result){
+            add_user(req.oidc.user.sub);
         }
-        add_user(req.oidc.user.sub)
-        .then( () => {
-            res.status(200);
-            res.send("JWT Token: " + req.oidc.idToken);
-            return;
-        });
+        res.status(200).send("JWT Token: " + req.oidc.idToken);
     });
 });
 
@@ -79,6 +70,16 @@ function check_header_type(req){
     } else {
         return true;
     }
+}
+
+async function check_new_user(name){
+    var users = await get_all_users();
+    for (i=0; i < users.length; i++) {
+        if (name === users[i].name) {
+            return false;
+        }
+    }
+    return true;
 }
 
 module.exports = router;

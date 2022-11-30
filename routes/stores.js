@@ -754,15 +754,6 @@ async function check_unique_name(name){
         }
     }
     return true;
-    /*return get_all_stores_general()
-    .then( (stores) => {
-        for (i=0; i < stores.length; i++) {
-            if (name === stores[i].name) {
-                return false;
-            }
-        }
-        return true;
-    });*/
 }
 
 // 406 - Accept Header is not JSON
