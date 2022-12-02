@@ -1,0 +1,6567 @@
+{
+	"info": {
+		"_postman_id": "cfc2315f-d3c3-479c-a059-5828c49a4a78",
+		"name": "Portfolio Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23630499"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "get users 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"application/json\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/users",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get users 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/users",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "stores",
+			"item": [
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_1\", pm.response.json()[\"id\"]);\r",
+									"pm.environment.set(\"user_id1\", pm.response.json()[\"owner\"]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_1\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Lon Lon Ranch\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Hyrule\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(5000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Lon Lon Ranch\",\r\n    \"location\": \"Hyrule\",\r\n    \"size\": 5000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_2\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_2\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Adventure Mart\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Adventure Land\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(10000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Adventure Mart\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_3\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_3\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Kiki's Bakery\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Ghibli\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(300);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_3\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Kiki's Bakery\",\r\n    \"location\": \"Ghibli\",\r\n    \"size\": 300\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_4\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_4\"));\r",
+									"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"A Snail's Journey\");\r",
+									"    pm.expect(pm.response.json()[\"location\"]).to.eq(\"Gastropodia\");\r",
+									"    pm.expect(pm.response.json()[\"size\"]).to.eq(1);\r",
+									"    pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"    pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"    pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_4\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"A Snail's Journey\",\r\n    \"location\": \"Gastropodia\",\r\n    \"size\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_5\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_5\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Howl's Moving Castle\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Ghibli\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(15000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_5\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Howl's Moving Castle\",\r\n    \"location\": \"Ghibli\",\r\n    \"size\": 15000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_6\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_6\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"General Store\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Everdell\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(50);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_6\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"General Store\",\r\n    \"location\": \"Everdell\",\r\n    \"size\": 50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_1_7\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_7\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Bag End General Store\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Middle-earth\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(750);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_7\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Bag End General Store\",\r\n    \"location\": \"Middle-earth\",\r\n    \"size\": 750\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_2_1\", pm.response.json()[\"id\"]);\r",
+									"pm.environment.set(\"user_id2\", pm.response.json()[\"owner\"]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_2_1\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Hydration Station\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Water Land\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(500);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id2\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_2_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hydration Station\",\r\n    \"location\": \"Water Land\",\r\n    \"size\": 500\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"store_id_jwt_2_2\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_2_2\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Crystal Emporium\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Water Land\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(700);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id2\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_2_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Crystal Emporium\",\r\n    \"location\": \"Water Land\",\r\n    \"size\": 700\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes or contains an invalid input for an attribute\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Feather Empurrium\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000,\r\n    \"manager\": \"Calico the Cat\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Feather Empurrium\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Feather Empurrium\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute is already assigned to another store\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Lon Lon Ranch\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "post store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Feather Empurrium\",\r\n    \"location\": \"Adventure Land\",\r\n    \"size\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get stores 200 - jwt1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function (){\r",
+									"    var stores = pm.response.json().stores;\r",
+									"    pm.expect(stores.length).to.eq(5);\r",
+									"    for (i=0; i < stores.length; i++){\r",
+									"        pm.expect(stores[i][\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get stores 200 - jwt2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function (){\r",
+									"    var stores = pm.response.json().stores;\r",
+									"    for (i=0; i < stores.length; i++){\r",
+									"        pm.expect(stores[i][\"owner\"]).to.eq(pm.environment.get(\"user_id2\"));\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get stores 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get stores 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get stores 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 200 - one attribute",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Hyrule Stop and Shop\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Hyrule\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(5000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hyrule Stop and Shop\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Hyrule Stop and Shop\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Hyrule\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(5000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 200 - two attributes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Adventure Super Mart\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Adventure Land\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(35000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Adventure Super Mart\",\r\n    \"size\": 35000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"id\"]).to.eq(pm.environment.get(\"store_id_jwt_1_2\"));\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Adventure Super Mart\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Adventure Land\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(35000);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id1\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_1_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object does not contain at least one attribute, contains all attributes of the entity, or contains an invalid input for an attribute\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\",\r\n    \"location\": \"Dragon Ave\",\r\n    \"size\": 500\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\",\r\n    \"size\": 500\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\",\r\n    \"size\": 500\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 403 - name already exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute already assigned to another store or is owned by another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hydration Station\",\r\n    \"size\": 500\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute already assigned to another store or is owned by another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Armor Land\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Cookies Inc.\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Wonderland\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(350);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id2\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\" + pm.environment.get(\"store_id_jwt_2_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Cookies Inc.\",\r\n    \"location\": \"Wonderland\",\r\n    \"size\": 350\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Cookies Inc.\");\r",
+									"   pm.expect(pm.response.json()[\"location\"]).to.eq(\"Wonderland\");\r",
+									"   pm.expect(pm.response.json()[\"size\"]).to.eq(350);\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"owner\"]).to.eq(pm.environment.get(\"user_id2\"));\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/stores/\"+ pm.environment.get(\"store_id_jwt_2_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes or contains an invalid input for an attribute\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Cookies Inc.\",\r\n    \"size\": 350\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 403 - name already exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute already assigned to another store or is owned by another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Crystal Emporium\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute already assigned to another store or is owned by another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put all stores 405",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"405 status code\", function () {\r",
+									"    pm.response.to.have.status(405);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The functionality to edit all entities at once is not supported\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pokemon Center\",\r\n    \"location\": \"Kanto\",\r\n    \"size\": 500\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all stores 405",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"405 status code\", function () {\r",
+									"    pm.response.to.have.status(405);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The functionality to delete all entities at once is not supported\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.request.headers.add({key: \"Accept\", value: \"application/json\"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_1\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Health Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"An item used for healing. Tastes like strawberries!\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Health Potion\",\r\n    \"type\": \"Potion\",\r\n    \"description\": \"An item used for healing. Tastes like strawberries!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_2\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Magic Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"An item used for restoring magic. Tastes like blueberries!\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Magic Potion\",\r\n    \"type\": \"Potion\",\r\n    \"description\": \"An item used for restoring magic. Tastes like blueberries!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_3\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Baguette\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Bread\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_3\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Baguette\",\r\n    \"type\": \"Bread\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_4\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Ring of Fire\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Accessory\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_4\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Ring of Fire\",\r\n    \"type\": \"Accessory\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_5\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Ring of Water\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Accessory\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_5\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Ring of Water\",\r\n    \"type\": \"Accessory\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"product_id_6\", pm.response.json()[\"id\"]);\r",
+									"\r",
+									"pm.test(\"201 status code\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Bao Buns\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Bread\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_6\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Bao Buns\",\r\n    \"type\": \"Bread\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes or contains an invalid input for an attribute\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Dragon Cape\",\r\n    \"description\": \"A cape that resists all damage\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute is already assigned to another product\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Health Potion\",\r\n    \"type\": \"Potion\",\r\n    \"description\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Health Potion\",\r\n    \"type\": \"Potion\",\r\n    \"description\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get products 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function (){\r",
+									"    var products = pm.response.json().products;\r",
+									"    pm.expect(products.length).to.eq(5);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get products 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 200 - one attribute",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Strawberry Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"An item used for healing. Tastes like strawberries!\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Strawberry Potion\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Strawberry Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"An item used for healing. Tastes like strawberries!\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 200 - two attributes - name and description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Blueberry Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"Great for cooking. Tastes like blueberry-infused maple syrup\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Blueberry Potion\",\r\n    \"description\": \"Great for cooking. Tastes like blueberry-infused maple syrup\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Blueberry Potion\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Potion\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"Great for cooking. Tastes like blueberry-infused maple syrup\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object does not contain at least one attribute, contains all attributes of the entity, or contains an invalid input for an attribute\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Blueberry Syrup\",\r\n    \"type\": \"Syrup\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute is already assigned to another product\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Strawberry Potion\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No product with this product_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Gauntlets of Invisibility\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patch product 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Gauntlets of Invisibility\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No product with this product_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"406 error message\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 200 - with description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Hearty Omelet\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Egg Dish\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"A delicious omelet. Restores health immediately upon consumption.\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hearty Omelet\",\r\n    \"type\": \"Egg Dish\",\r\n    \"description\": \"A delicious omelet. Restores health immediately upon consumption.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Hearty Omelet\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Egg Dish\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"A delicious omelet. Restores health immediately upon consumption.\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_2\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 200 - no description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Slime Jelly\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Monster Drop\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_3\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Slime Jelly\",\r\n    \"type\": \"Monster Drop\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"name\"]).to.eq(\"Slime Jelly\");\r",
+									"   pm.expect(pm.response.json()[\"type\"]).to.eq(\"Monster Drop\");\r",
+									"   pm.expect(pm.response.json()[\"description\"]).to.eq(\"\");\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(0);\r",
+									"   pm.expect(pm.response.json()[\"self\"]).to.eq(pm.environment.get(\"app_url\") + \"/products/\" + pm.environment.get(\"product_id_3\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 status code\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes or contains an invalid input for an attribute\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Red Slime Jelly\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The requested name attribute is already assigned to another product\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Strawberry Potion\",\r\n    \"type\": \"Syrup\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No product with this product_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Croissant\",\r\n    \"type\": \"Bread\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put product 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Croissant\",\r\n    \"type\": \"Bread\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "put all products 405",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"405 status code\", function () {\r",
+									"    pm.response.to.have.status(405);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The functionality to edit all entities at once is not supported\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Croissant\",\r\n    \"type\": \"Bread\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No product with this product_id exists\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all products 405",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"405 status code\", function () {\r",
+									"    pm.response.to.have.status(405);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The functionality to delete all entities at once is not supported\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.request.headers.add({key: \"Accept\", value: \"application/json\"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "relationships",
+			"item": [
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    var stock = pm.response.json()[\"stock\"];\r",
+									"    pm.expect(stock.length).to.eq(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   var stores = pm.response.json()[\"stores\"];\r",
+									"    pm.expect(stores.length).to.eq(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_4}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_4}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    var stock = pm.response.json()[\"stock\"];\r",
+									"    pm.expect(stock.length).to.eq(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   var stores = pm.response.json()[\"stores\"];\r",
+									"    pm.expect(stores.length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user or the product is already stocked at this store\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 403 - product already stocked at store",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user or the product is already stocked at this store\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 404 - invalid store_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 404 - invalid product_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_3}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_3}}",
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 404 - invalid store_id and invalid product_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}",
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_3}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_3}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 401 - invalid jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{invalid_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 401 - missing jwt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 status code\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unauthorized\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{missing_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 403 - owned by another user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user or the product is not at this store\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 403 - product not stocked at store",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"403 status code\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"This store is owned by another user or the product is not at this store\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_6}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_6}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 404 - invalid store_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 404 - invalid product_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 404 - invalid store_id and invalid product_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 status code\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No store with this store_id exists or no product with this product_id exists\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{invalid_store_id}}/products/{{invalid_product_id}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{invalid_store_id}}",
+								"products",
+								"{{invalid_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 406",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"406 status code\", function () {\r",
+									"    pm.response.to.have.status(406);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Not Acceptable\")\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({key: \"Accept\", value: \"text/html\"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    var stock = pm.response.json()[\"stock\"];\r",
+									"    pm.expect(stock.length).to.eq(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   var stores = pm.response.json()[\"stores\"];\r",
+									"    pm.expect(stores.length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product from store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    var stock = pm.response.json()[\"stock\"];\r",
+									"    pm.expect(stock.length).to.eq(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   var stores = pm.response.json()[\"stores\"];\r",
+									"    pm.expect(stores.length).to.eq(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_5}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_5}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   var stores = pm.response.json()[\"stores\"];\r",
+									"    pm.expect(stores.length).to.eq(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get product 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"stores\"].length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}",
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add product to store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}/products/{{product_id_6}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}",
+								"products",
+								"{{product_id_6}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"    var stock = pm.response.json()[\"stock\"];\r",
+									"    console.log(stock);\r",
+									"    pm.expect(stock.length).to.eq(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 status code\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get store 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 status code\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body\", function () {\r",
+									"   pm.expect(pm.response.json()[\"stock\"].length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.request.headers.add({key: \"Accept\", value: \"application/json\"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "cleanup",
+			"item": [
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_4}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_4}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_5}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_5}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_6}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_6}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_1_7}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_1_7}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_1}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete store 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/stores/{{store_id_jwt_2_2}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"stores",
+								"{{store_id_jwt_2_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_3}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_4}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_4}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_5}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_5}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete product 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{app_url}}/products/{{product_id_6}}",
+							"host": [
+								"{{app_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id_6}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.request.headers.add({key: \"Accept\", value: \"application/json\"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
