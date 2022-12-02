@@ -44,6 +44,7 @@ router.get('/user', requiresAuth(), function(req, res){
             add_user(req.oidc.user.sub);
         }
         res.status(200).render('users.ejs', {
+            user_id: req.oidc.user.sub,
             jwt_token: req.oidc.idToken
         });
         return;
